@@ -12,7 +12,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
               <div className="p-2 rounded-lg bg-primary">
                 <ShoppingBag className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-xl">GroceryHub</span>
+              <span className="font-bold text-xl">Near Buy</span>
             </Link>
             
             <div className="hidden md:flex items-center gap-6">
