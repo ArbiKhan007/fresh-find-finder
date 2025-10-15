@@ -4,6 +4,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import CustomerDashboard from "./pages/customer/Dashboard";
+import ShopkeeperDashboard from "./pages/shopkeeper/Dashboard";
+import CoordinatorDashboard from "./pages/coordinator/Dashboard";
+import AdminDashboard from "./pages/admin/Dashboard";
+import MaintDashboard from "./pages/maint/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -16,6 +23,24 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          
+          {/* Customer Routes */}
+          <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+          
+          {/* Shopkeeper Routes */}
+          <Route path="/shopkeeper/dashboard" element={<ShopkeeperDashboard />} />
+          
+          {/* Service Desk Coordinator Routes */}
+          <Route path="/coordinator/dashboard" element={<CoordinatorDashboard />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          
+          {/* Maint (Superuser) Routes */}
+          <Route path="/maint/dashboard" element={<MaintDashboard />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
