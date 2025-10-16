@@ -30,30 +30,31 @@ export default function Login() {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || "Login failed");
+        const errorMessage = await response.text();
+        
+        if (response.status === 404) {
+          throw new Error("User not found. Please check your email.");
+        } else if (response.status === 401) {
+          throw new Error("Invalid credentials. Please check your password.");
+        } else {
+          throw new Error(errorMessage || "Login failed");
+        }
       }
 
-      // Store auth token if provided
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
-      }
-      
-      // Store user data if provided
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
+      const user = await response.json();
+
+      // Store user data
+      localStorage.setItem("user", JSON.stringify(user));
 
       toast({
         title: "Success",
-        description: "Login successful!",
+        description: `Welcome back, ${user.name}!`,
       });
 
-      // Navigate based on user role or to default dashboard
-      const userRole = data.user?.role || "customer";
-      navigate(`/${userRole}/dashboard`);
+      // Navigate based on userType
+      const userType = user.userType?.toLowerCase() || "customer";
+      navigate(`/${userType}/dashboard`);
     } catch (error) {
       toast({
         title: "Error",
