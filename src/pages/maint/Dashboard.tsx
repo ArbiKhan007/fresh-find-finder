@@ -1,9 +1,12 @@
 import { Shield, Users, Store, Activity, UserPlus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import MaintLayout from "@/components/layouts/MaintLayout";
 
 export default function MaintDashboard() {
+  const navigate = useNavigate();
+  
   const stats = [
     { title: "Total Users", value: "1,234", icon: Users },
     { title: "Total Shops", value: "156", icon: Store },
@@ -19,7 +22,7 @@ export default function MaintDashboard() {
             <h1 className="text-3xl font-bold mb-2">Superuser Dashboard</h1>
             <p className="text-muted-foreground">Complete platform control and monitoring</p>
           </div>
-          <Button>
+          <Button onClick={() => navigate("/maint/invite-admin")}>
             <UserPlus className="h-4 w-4 mr-2" />
             Invite Admin
           </Button>

@@ -11,6 +11,7 @@ import ShopkeeperDashboard from "./pages/shopkeeper/Dashboard";
 import CoordinatorDashboard from "./pages/coordinator/Dashboard";
 import AdminDashboard from "./pages/admin/Dashboard";
 import MaintDashboard from "./pages/maint/Dashboard";
+import InviteAdmin from "./pages/maint/InviteAdmin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
           
           {/* Maint (Superuser) Routes */}
           <Route path="/maint/dashboard" element={<MaintDashboard />} />
+          <Route path="/maint/invite-admin" element={<InviteAdmin />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
