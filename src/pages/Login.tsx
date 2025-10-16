@@ -16,9 +16,11 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("🚀 Sign In button clicked - Starting API call...");
     setIsLoading(true);
 
     try {
+      console.log("📡 Calling API:", "http://localhost:8080/api/v1/user/signin");
       const response = await fetch("http://localhost:8080/api/v1/user/signin", {
         method: "POST",
         headers: {
@@ -43,6 +45,7 @@ export default function Login() {
       }
 
       const user = await response.json();
+      console.log("✅ Login successful, user data:", user);
 
       // Store user data
       localStorage.setItem("user", JSON.stringify(user));
@@ -56,6 +59,7 @@ export default function Login() {
       const userType = user.userType?.toLowerCase() || "customer";
       navigate(`/${userType}/dashboard`);
     } catch (error) {
+      console.error("❌ Login error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Invalid email or password",
