@@ -49,7 +49,7 @@ export default function InviteAdmin() {
       const user = userStr ? JSON.parse(userStr) : null;
       const userId = user?.id || "current-maint-user-id";
       
-      const response = await fetch(`http://localhost:8080/admin/invite?userId=${userId}`, {
+      const response = await fetch(`http://localhost:8080/api/v1/admin/invite?userId=${userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
