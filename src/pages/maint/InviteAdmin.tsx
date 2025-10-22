@@ -44,25 +44,30 @@ export default function InviteAdmin() {
     setIsLoading(true);
     
     try {
-      // TODO: Replace with actual backend endpoint
-      console.log("Inviting admin with data:", data);
+      // TODO: Replace with actual userId from authentication context
+      const userId = localStorage.getItem("userId") || "current-maint-user-id";
       
-      // Placeholder for API call
-      // const response = await fetch("http://localhost:8080/api/v1/admin/invite", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     ...data,
-      //     phoneNumber: parseInt(data.phoneNumber),
-      //     pincode: parseInt(data.pincode),
-      //   }),
-      // });
+      const response = await fetch(`http://localhost:8080/admin/invite?userId=${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phoneNumber: parseInt(data.phoneNumber),
+          pincode: parseInt(data.pincode),
+          addressLine1: data.addressLine1,
+          addressLine2: data.addressLine2 || "",
+          addressLine3: data.addressLine3 || "",
+          gender: data.gender,
+        }),
+      });
       
-      // if (!response.ok) {
-      //   throw new Error("Failed to invite admin");
-      // }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to invite admin");
+      }
       
       toast({
         title: "Success",
@@ -71,6 +76,7 @@ export default function InviteAdmin() {
       
       navigate("/maint/dashboard");
     } catch (error) {
+      console.error("Error inviting admin:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to invite admin",
