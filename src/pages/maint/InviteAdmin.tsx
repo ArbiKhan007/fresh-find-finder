@@ -44,8 +44,10 @@ export default function InviteAdmin() {
     setIsLoading(true);
     
     try {
-      // TODO: Replace with actual userId from authentication context
-      const userId = localStorage.getItem("id") || "current-maint-user-id";
+      // Get userId from stored user object
+      const userStr = localStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : null;
+      const userId = user?.id || "current-maint-user-id";
       
       const response = await fetch(`http://localhost:8080/admin/invite?userId=${userId}`, {
         method: "POST",
