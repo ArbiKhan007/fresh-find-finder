@@ -10,8 +10,10 @@ import CustomerDashboard from "./pages/customer/Dashboard";
 import ShopkeeperDashboard from "./pages/shopkeeper/Dashboard";
 import CoordinatorDashboard from "./pages/coordinator/Dashboard";
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminInviteCoordinator from "./pages/admin/InviteCoordinator";
 import MaintDashboard from "./pages/maint/Dashboard";
-import InviteAdmin from "./pages/maint/InviteAdmin";
+import MaintInviteAdmin from "./pages/maint/InviteAdmin";
+import MaintInviteCoordinator from "./pages/maint/InviteCoordinator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,10 +40,12 @@ const App = () => (
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/invite-coordinator" element={<AdminInviteCoordinator />} />
           
           {/* Maint (Superuser) Routes */}
           <Route path="/maint/dashboard" element={<MaintDashboard />} />
-          <Route path="/maint/invite-admin" element={<InviteAdmin />} />
+          <Route path="/maint/invite-admin" element={<MaintInviteAdmin />} />
+          <Route path="/maint/invite-coordinator" element={<MaintInviteCoordinator />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
