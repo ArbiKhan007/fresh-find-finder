@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Users, AlertTriangle, Activity, UserPlus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import AdminLayout from "@/components/layouts/AdminLayout";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const stats = [
     { title: "Service Desk Coordinators", value: "15", icon: Users },
     { title: "P1 Escalations", value: "3", icon: AlertTriangle },
@@ -20,7 +22,7 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage coordinators and escalations</p>
           </div>
-          <Button>
+          <Button onClick={() => navigate("/admin/invite-coordinator")}>
             <UserPlus className="h-4 w-4 mr-2" />
             Invite Coordinator
           </Button>
