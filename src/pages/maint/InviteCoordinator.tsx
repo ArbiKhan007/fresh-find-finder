@@ -40,39 +40,39 @@ export default function InviteCoordinator() {
       const user = userStr ? JSON.parse(userStr) : null;
       const userId = user?.id || "current-maint-user-id";
       
-      const response = await fetch(`http://localhost:8080/api/v1/coordinator/invite?userId=${userId}`, {
+      const response = await fetch(`http://localhost:8080/api/v1/cordinator/invite?userId=${userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phoneNumber: parseInt(formData.phoneNumber),
+          pincode: parseInt(formData.pincode),
+          addressLine1: formData.addressLine1,
+          addressLine2: formData.addressLine2 || "",
+          addressLine3: formData.addressLine3 || "",
+          gender: formData.gender,
+        }),
       });
 
-      if (response.ok) {
-        toast({
-          title: "Invitation Sent",
-          description: `An invitation has been sent to ${formData.email}`,
-        });
-        setFormData({
-          name: "",
-          email: "",
-          password: "",
-          phoneNumber: "",
-          pincode: "",
-          addressLine1: "",
-          addressLine2: "",
-          addressLine3: "",
-          userType: "COORDINATOR",
-          gender: "",
-          status: "ACTIVE"
-        });
-      } else {
-        throw new Error("Failed to send invitation");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to send invitation");
       }
+
+      toast({
+        title: "Success",
+        description: `Coordinator invitation sent successfully to ${formData.email}!`,
+      });
+      
+      navigate("/maint/dashboard");
     } catch (error) {
+      console.error("Error inviting coordinator:", error);
       toast({
         title: "Error",
-        description: "Failed to send invitation. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to send invitation. Please try again.",
         variant: "destructive",
       });
     } finally {
