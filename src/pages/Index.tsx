@@ -82,7 +82,7 @@ export default function Index() {
               Join our platform to reach more customers and grow your business. 
               Manage your inventory, track orders, and expand your reach.
             </p>
-            <Link to="/signup">
+            <Link to="/shop-registration">
               <Button size="lg" className="text-lg">
                 Register Your Shop
               </Button>
