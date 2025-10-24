@@ -72,9 +72,9 @@ export default function RegistrationRequests() {
   }, []);
 
   const fetchRegistrationRequests = async () => {
-    const userId = localStorage.getItem("userId");
+    const userStr = localStorage.getItem("user");
     
-    if (!userId) {
+    if (!userStr) {
       toast({
         title: "Error",
         description: "User not logged in. Please login again.",
@@ -83,6 +83,9 @@ export default function RegistrationRequests() {
       navigate("/login");
       return;
     }
+
+    const user = JSON.parse(userStr);
+    const userId = user.id;
 
     try {
       const response = await fetch(
