@@ -7,6 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Activity {
   id: number;
@@ -16,6 +20,21 @@ interface Activity {
     name: string;
   };
   createdAt: string;
+}
+
+interface Shopkeeper {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  phoneNumber: number;
+  pincode: number;
+  addressLine1: string;
+  addressLine2: string;
+  addressLine3: string;
+  userType: string;
+  gender: string;
+  status: string;
 }
 
 interface Shop {
@@ -28,6 +47,7 @@ interface Shop {
   addressLine2: string;
   addressLine3: string;
   phoneNumber: number;
+  shopkeeper: Shopkeeper;
 }
 
 interface RegistrationRequest {
@@ -41,6 +61,8 @@ export default function RegistrationRequests() {
   const [requests, setRequests] = useState<RegistrationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const [selectedRequest, setSelectedRequest] = useState<RegistrationRequest | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -63,7 +85,7 @@ export default function RegistrationRequests() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/registration-requests?userId=${userId}`,
+        `http://localhost:8080/api/v1/registration-request/all?userId=${userId}`,
         {
           method: "GET",
           headers: {
@@ -97,6 +119,11 @@ export default function RegistrationRequests() {
       newExpanded.add(id);
     }
     setExpandedRows(newExpanded);
+  };
+
+  const openRequestForm = (request: RegistrationRequest) => {
+    setSelectedRequest(request);
+    setDialogOpen(true);
   };
 
   if (loading) {
@@ -147,8 +174,12 @@ export default function RegistrationRequests() {
                   <TableBody>
                     {requests.map((request) => (
                       <>
-                        <TableRow key={request.id}>
-                          <TableCell>
+                        <TableRow 
+                          key={request.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => openRequestForm(request)}
+                        >
+                          <TableCell onClick={(e) => e.stopPropagation()}>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -222,6 +253,123 @@ export default function RegistrationRequests() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Registration Request Details</DialogTitle>
+            <DialogDescription>
+              View complete details of the shop registration request
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedRequest && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Shop Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Shop Name</Label>
+                    <Input value={selectedRequest.shop.shopName} readOnly />
+                  </div>
+                  <div>
+                    <Label>GST Number</Label>
+                    <Input value={selectedRequest.shop.gstNumber} readOnly />
+                  </div>
+                  <div>
+                    <Label>State</Label>
+                    <Input value={selectedRequest.shop.state} readOnly />
+                  </div>
+                  <div>
+                    <Label>Pincode</Label>
+                    <Input value={selectedRequest.shop.pincode} readOnly />
+                  </div>
+                  <div>
+                    <Label>Phone Number</Label>
+                    <Input value={selectedRequest.shop.phoneNumber} readOnly />
+                  </div>
+                  <div className="col-span-2">
+                    <Label>Address Line 1</Label>
+                    <Input value={selectedRequest.shop.addressLine1} readOnly />
+                  </div>
+                  <div>
+                    <Label>Address Line 2</Label>
+                    <Input value={selectedRequest.shop.addressLine2 || ""} readOnly />
+                  </div>
+                  <div>
+                    <Label>Address Line 3</Label>
+                    <Input value={selectedRequest.shop.addressLine3 || ""} readOnly />
+                  </div>
+                  <div className="col-span-2">
+                    <Label>Shop Description</Label>
+                    <Textarea value={selectedRequest.shopDescription || ""} readOnly rows={3} />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Shopkeeper Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Name</Label>
+                    <Input value={selectedRequest.shop.shopkeeper.name} readOnly />
+                  </div>
+                  <div>
+                    <Label>Email</Label>
+                    <Input value={selectedRequest.shop.shopkeeper.email} readOnly />
+                  </div>
+                  <div>
+                    <Label>Phone Number</Label>
+                    <Input value={selectedRequest.shop.shopkeeper.phoneNumber} readOnly />
+                  </div>
+                  <div>
+                    <Label>Gender</Label>
+                    <Input value={selectedRequest.shop.shopkeeper.gender} readOnly />
+                  </div>
+                  <div>
+                    <Label>Status</Label>
+                    <Badge variant={selectedRequest.shop.shopkeeper.status === "PENDING_REVIEW" ? "secondary" : "default"}>
+                      {selectedRequest.shop.shopkeeper.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label>Pincode</Label>
+                    <Input value={selectedRequest.shop.shopkeeper.pincode} readOnly />
+                  </div>
+                  <div className="col-span-2">
+                    <Label>Address Line 1</Label>
+                    <Input value={selectedRequest.shop.shopkeeper.addressLine1} readOnly />
+                  </div>
+                  <div>
+                    <Label>Address Line 2</Label>
+                    <Input value={selectedRequest.shop.shopkeeper.addressLine2 || ""} readOnly />
+                  </div>
+                  <div>
+                    <Label>Address Line 3</Label>
+                    <Input value={selectedRequest.shop.shopkeeper.addressLine3 || ""} readOnly />
+                  </div>
+                </div>
+              </div>
+
+              {selectedRequest.activities && selectedRequest.activities.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Activities</h3>
+                  <div className="space-y-2">
+                    {selectedRequest.activities.map((activity) => (
+                      <div key={activity.id} className="border-l-2 border-primary pl-4 py-2 bg-muted/50 rounded">
+                        <p className="text-sm">{activity.text}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          By {activity.user.name} • {new Date(activity.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }
