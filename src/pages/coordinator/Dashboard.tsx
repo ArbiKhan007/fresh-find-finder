@@ -1,10 +1,12 @@
-import { UserCheck, Ticket, Clock, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { UserCheck, Ticket, Clock, CheckCircle, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CoordinatorLayout from "@/components/layouts/CoordinatorLayout";
 
 export default function CoordinatorDashboard() {
+  const navigate = useNavigate();
   const stats = [
     { title: "Pending Approvals", value: "12", icon: Clock },
     { title: "Approved Today", value: "8", icon: CheckCircle },
@@ -43,8 +45,16 @@ export default function CoordinatorDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Pending Shop Approvals</CardTitle>
-            <CardDescription>Review and approve shopkeeper registrations</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Pending Shop Approvals</CardTitle>
+                <CardDescription>Review and approve shopkeeper registrations</CardDescription>
+              </div>
+              <Button onClick={() => navigate("/coordinator/registration-requests")} size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                View All Requests
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

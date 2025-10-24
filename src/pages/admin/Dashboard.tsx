@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Users, AlertTriangle, Activity, UserPlus } from "lucide-react";
+import { Users, AlertTriangle, Activity, UserPlus, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,10 +22,16 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage coordinators and escalations</p>
           </div>
-          <Button onClick={() => navigate("/admin/invite-coordinator")}>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Invite Coordinator
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate("/admin/registration-requests")} variant="outline">
+              <FileText className="h-4 w-4 mr-2" />
+              Registration Requests
+            </Button>
+            <Button onClick={() => navigate("/admin/invite-coordinator")}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Invite Coordinator
+            </Button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">

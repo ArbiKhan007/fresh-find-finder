@@ -10,11 +10,14 @@ import ShopRegistration from "./pages/ShopRegistration";
 import CustomerDashboard from "./pages/customer/Dashboard";
 import ShopkeeperDashboard from "./pages/shopkeeper/Dashboard";
 import CoordinatorDashboard from "./pages/coordinator/Dashboard";
+import CoordinatorRegistrationRequests from "./pages/coordinator/RegistrationRequests";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminInviteCoordinator from "./pages/admin/InviteCoordinator";
+import AdminRegistrationRequests from "./pages/admin/RegistrationRequests";
 import MaintDashboard from "./pages/maint/Dashboard";
 import MaintInviteAdmin from "./pages/maint/InviteAdmin";
 import MaintInviteCoordinator from "./pages/maint/InviteCoordinator";
+import MaintRegistrationRequests from "./pages/maint/RegistrationRequests";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,15 +42,18 @@ const App = () => (
           
           {/* Service Desk Coordinator Routes */}
           <Route path="/coordinator/dashboard" element={<CoordinatorDashboard />} />
+          <Route path="/coordinator/registration-requests" element={<CoordinatorRegistrationRequests />} />
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/invite-coordinator" element={<AdminInviteCoordinator />} />
+          <Route path="/admin/registration-requests" element={<AdminRegistrationRequests />} />
           
           {/* Maint (Superuser) Routes */}
           <Route path="/maint/dashboard" element={<MaintDashboard />} />
           <Route path="/maint/invite-admin" element={<MaintInviteAdmin />} />
           <Route path="/maint/invite-coordinator" element={<MaintInviteCoordinator />} />
+          <Route path="/maint/registration-requests" element={<MaintRegistrationRequests />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

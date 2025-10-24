@@ -1,4 +1,4 @@
-import { Shield, Users, Store, Activity, UserPlus } from "lucide-react";
+import { Shield, Users, Store, Activity, UserPlus, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -22,10 +22,16 @@ export default function MaintDashboard() {
             <h1 className="text-3xl font-bold mb-2">Superuser Dashboard</h1>
             <p className="text-muted-foreground">Complete platform control and monitoring</p>
           </div>
-          <Button onClick={() => navigate("/maint/invite-admin")}>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Invite Admin
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate("/maint/registration-requests")} variant="outline">
+              <FileText className="h-4 w-4 mr-2" />
+              Registration Requests
+            </Button>
+            <Button onClick={() => navigate("/maint/invite-admin")}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Invite Admin
+            </Button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
