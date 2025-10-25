@@ -1,4 +1,4 @@
-import { ShoppingBag, Package, ShoppingCart as Orders, Users, Settings } from "lucide-react";
+import { ShoppingBag, Package, PackagePlus, ShoppingCart as Orders, Users, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -8,6 +8,7 @@ export default function ShopkeeperLayout({ children }: { children: React.ReactNo
   const navItems = [
     { path: "/shopkeeper/dashboard", label: "Dashboard", icon: ShoppingBag },
     { path: "/shopkeeper/products", label: "Products", icon: Package },
+    { path: "/shopkeeper/products/add", label: "Add Product", icon: PackagePlus },
     { path: "/shopkeeper/orders", label: "Orders", icon: Orders },
     { path: "/shopkeeper/delivery", label: "Delivery Staff", icon: Users },
   ];
