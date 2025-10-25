@@ -68,6 +68,7 @@ export default function RegistrationRequests() {
   const [newActivity, setNewActivity] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isPostingActivity, setIsPostingActivity] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -136,7 +137,67 @@ export default function RegistrationRequests() {
     setDialogOpen(true);
   };
 
-  const handleSave = async () => {
+  const handlePostActivity = async () => {
+    if (!selectedRequest || !newActivity.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a comment.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const userStr = localStorage.getItem("user");
+    if (!userStr) {
+      toast({
+        title: "Error",
+        description: "User not logged in.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const user = JSON.parse(userStr);
+
+    setIsPostingActivity(true);
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v1/registration-request/${selectedRequest.id}/activity`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            activityText: newActivity.trim(),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to post activity");
+      }
+
+      toast({
+        title: "Success",
+        description: "Activity posted successfully",
+      });
+
+      setNewActivity("");
+      fetchRegistrationRequests();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to post activity. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPostingActivity(false);
+    }
+  };
+
+  const handleSaveStatus = async () => {
     if (!selectedRequest) return;
 
     const userStr = localStorage.getItem("user");
@@ -154,7 +215,7 @@ export default function RegistrationRequests() {
     setIsSaving(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/registration-request/${selectedRequest.id}`,
+        `http://localhost:8080/api/v1/registration-request/${selectedRequest.id}/status`,
         {
           method: "PUT",
           headers: {
@@ -163,18 +224,17 @@ export default function RegistrationRequests() {
           body: JSON.stringify({
             userId: user.id,
             status: selectedStatus,
-            activityText: newActivity.trim() || undefined,
           }),
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to update registration request");
+        throw new Error("Failed to update status");
       }
 
       toast({
         title: "Success",
-        description: "Registration request updated successfully",
+        description: "Status updated successfully",
       });
 
       setDialogOpen(false);
@@ -182,7 +242,7 @@ export default function RegistrationRequests() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update registration request. Please try again.",
+        description: "Failed to update status. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -417,17 +477,23 @@ export default function RegistrationRequests() {
 
               <div>
                 <h3 className="text-lg font-semibold mb-4">Status</h3>
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">Active</SelectItem>
-                    <SelectItem value="INACTIVE">Inactive</SelectItem>
-                    <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
-                    <SelectItem value="DELETED">Deleted</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
+                      <SelectItem value="INACTIVE">Inactive</SelectItem>
+                      <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
+                      <SelectItem value="DELETED">Deleted</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleSaveStatus} disabled={isSaving}>
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Save Status
+                  </Button>
+                </div>
               </div>
 
               <div>
@@ -454,17 +520,21 @@ export default function RegistrationRequests() {
                     placeholder="Enter your comment or activity..."
                     rows={3}
                   />
+                  <Button 
+                    onClick={handlePostActivity} 
+                    disabled={isPostingActivity || !newActivity.trim()}
+                    className="mt-2"
+                  >
+                    {isPostingActivity ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Post Activity
+                  </Button>
                 </div>
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSaving}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Save Changes
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
