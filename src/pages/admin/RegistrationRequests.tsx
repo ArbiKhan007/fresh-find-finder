@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Activity {
   id: number;
@@ -63,6 +64,9 @@ export default function RegistrationRequests() {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [selectedRequest, setSelectedRequest] = useState<RegistrationRequest | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [newActivity, setNewActivity] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -126,7 +130,63 @@ export default function RegistrationRequests() {
 
   const openRequestForm = (request: RegistrationRequest) => {
     setSelectedRequest(request);
+    setSelectedStatus(request.shop.shopkeeper.status);
+    setNewActivity("");
     setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!selectedRequest) return;
+
+    const userStr = localStorage.getItem("user");
+    if (!userStr) {
+      toast({
+        title: "Error",
+        description: "User not logged in.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const user = JSON.parse(userStr);
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v1/registration-request/${selectedRequest.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            status: selectedStatus,
+            activityText: newActivity.trim() || undefined,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update registration request");
+      }
+
+      toast({
+        title: "Success",
+        description: "Registration request updated successfully",
+      });
+
+      setDialogOpen(false);
+      fetchRegistrationRequests();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update registration request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (loading) {
@@ -354,10 +414,25 @@ export default function RegistrationRequests() {
                 </div>
               </div>
 
-              {selectedRequest.activities && selectedRequest.activities.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Activities</h3>
-                  <div className="space-y-2">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Status</h3>
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
+                    <SelectItem value="APPROVED">Approved</SelectItem>
+                    <SelectItem value="REJECTED">Rejected</SelectItem>
+                    <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Activities</h3>
+                {selectedRequest.activities && selectedRequest.activities.length > 0 && (
+                  <div className="space-y-2 mb-4">
                     {selectedRequest.activities.map((activity) => (
                       <div key={activity.id} className="border-l-2 border-primary pl-4 py-2 bg-muted/50 rounded">
                         <p className="text-sm">{activity.text}</p>
@@ -367,10 +442,28 @@ export default function RegistrationRequests() {
                       </div>
                     ))}
                   </div>
+                )}
+                <div>
+                  <Label>Add Comment</Label>
+                  <Textarea 
+                    value={newActivity}
+                    onChange={(e) => setNewActivity(e.target.value)}
+                    placeholder="Enter your comment or activity..."
+                    rows={3}
+                  />
                 </div>
-              )}
+              </div>
             </div>
           )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSaving}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Save Changes
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </AdminLayout>
