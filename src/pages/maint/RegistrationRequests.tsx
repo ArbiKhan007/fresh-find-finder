@@ -421,10 +421,10 @@ export default function RegistrationRequests() {
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="ACTIVE">Active</SelectItem>
+                    <SelectItem value="INACTIVE">Inactive</SelectItem>
                     <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
-                    <SelectItem value="APPROVED">Approved</SelectItem>
-                    <SelectItem value="REJECTED">Rejected</SelectItem>
-                    <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
+                    <SelectItem value="DELETED">Deleted</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
