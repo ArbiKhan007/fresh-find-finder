@@ -430,21 +430,23 @@ export default function RegistrationRequests() {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-4">Activities</h3>
-                {selectedRequest.activities && selectedRequest.activities.length > 0 && (
-                  <div className="space-y-2 mb-4">
-                    {selectedRequest.activities.map((activity) => (
+                <h3 className="text-lg font-semibold mb-4">Activity History</h3>
+                <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
+                  {selectedRequest.activities && selectedRequest.activities.length > 0 ? (
+                    selectedRequest.activities.map((activity) => (
                       <div key={activity.id} className="border-l-2 border-primary pl-4 py-2 bg-muted/50 rounded">
                         <p className="text-sm">{activity.text}</p>
                         <p className="text-xs text-muted-foreground mt-1">
                           By {activity.user.name} • {new Date(activity.createdAt).toLocaleString()}
                         </p>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">No activities yet</p>
+                  )}
+                </div>
                 <div>
-                  <Label>Add Comment</Label>
+                  <Label>Add New Comment</Label>
                   <Textarea 
                     value={newActivity}
                     onChange={(e) => setNewActivity(e.target.value)}
