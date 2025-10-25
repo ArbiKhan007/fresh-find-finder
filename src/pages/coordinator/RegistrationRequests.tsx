@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import CoordinatorLayout from "@/components/layouts/CoordinatorLayout";
+import AdminLayout from "@/components/layouts/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Activity {
   id: number;
@@ -162,15 +161,14 @@ export default function RegistrationRequests() {
     setIsPostingActivity(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/registration-request/${selectedRequest.id}/activity`,
+        `http://localhost:8080/api/v1/registration-request/activity/add?reqId=${selectedRequest.id}&userId=${user.id}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId: user.id,
-            activityText: newActivity.trim(),
+            comment: newActivity.trim(),
           }),
         }
       );
@@ -179,13 +177,18 @@ export default function RegistrationRequests() {
         throw new Error("Failed to post activity");
       }
 
+      const updatedRequest: RegistrationRequest = await response.json();
       toast({
         title: "Success",
         description: "Activity posted successfully",
       });
 
       setNewActivity("");
-      fetchRegistrationRequests();
+      // Update selected request and list in-place from response
+      setSelectedRequest(updatedRequest);
+      setRequests((prev) =>
+        prev.map((r) => (r.id === updatedRequest.id ? updatedRequest : r))
+      );
     } catch (error) {
       toast({
         title: "Error",
@@ -252,16 +255,16 @@ export default function RegistrationRequests() {
 
   if (loading) {
     return (
-      <CoordinatorLayout>
+      <AdminLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </CoordinatorLayout>
+      </AdminLayout>
     );
   }
 
   return (
-    <CoordinatorLayout>
+    <AdminLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Shop Registration Requests</h1>
@@ -539,6 +542,6 @@ export default function RegistrationRequests() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </CoordinatorLayout>
+    </AdminLayout>
   );
 }
