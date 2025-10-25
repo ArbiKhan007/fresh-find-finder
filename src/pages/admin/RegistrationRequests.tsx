@@ -161,15 +161,14 @@ export default function RegistrationRequests() {
     setIsPostingActivity(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/registration-request/${selectedRequest.id}/activity`,
+        `http://localhost:8080/api/v1/registration-request/activity/add?reqId=${selectedRequest.id}&userId=${user.id}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId: user.id,
-            activityText: newActivity.trim(),
+            comment: newActivity.trim(),
           }),
         }
       );
@@ -178,13 +177,18 @@ export default function RegistrationRequests() {
         throw new Error("Failed to post activity");
       }
 
+      const updatedRequest: RegistrationRequest = await response.json();
       toast({
         title: "Success",
         description: "Activity posted successfully",
       });
 
       setNewActivity("");
-      fetchRegistrationRequests();
+      // Update selected request and list in-place from response
+      setSelectedRequest(updatedRequest);
+      setRequests((prev) =>
+        prev.map((r) => (r.id === updatedRequest.id ? updatedRequest : r))
+      );
     } catch (error) {
       toast({
         title: "Error",
