@@ -92,8 +92,13 @@ export default function AddProduct() {
     setIsSubmitting(true);
 
     try {
-      // Adjust endpoint as per backend. Following existing pattern under /api/v1/*
-      const response = await fetch("http://localhost:8080/api/v1/products", {
+      // Require a selected shopId
+      if (!form.shopId) {
+        throw new Error("Please select your shop before adding a product.");
+      }
+
+      // Integrate provided endpoint
+      const response = await fetch("http://localhost:8080/api/v1/shop/product/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
