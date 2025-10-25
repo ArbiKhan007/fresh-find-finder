@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ interface ProductForm {
 export default function AddProduct() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [shops, setShops] = useState<Array<{ id: number; shopName: string }>>([]);
   const [form, setForm] = useState<ProductForm>({
     productName: "",
     productSpecification: "",
@@ -34,6 +35,36 @@ export default function AddProduct() {
     imageLinks: [""]
   });
 
+  // Load shop(s) from localStorage (set at login/dashboard loader)
+  useEffect(() => {
+    try {
+      // Support both single shop under key 'shop' and multiple under 'shops'
+      const rawSingle = localStorage.getItem("shop");
+      const rawMany = localStorage.getItem("shops");
+      let loaded: Array<{ id: number; shopName: string }> = [];
+
+      if (rawMany) {
+        const arr = JSON.parse(rawMany);
+        if (Array.isArray(arr)) {
+          loaded = arr.map((s: any) => ({ id: s.id, shopName: s.shopName }))
+                      .filter((s: any) => s.id != null);
+        }
+      } else if (rawSingle) {
+        const s = JSON.parse(rawSingle);
+        if (s && typeof s === "object" && s.id != null) {
+          loaded = [{ id: s.id, shopName: s.shopName || `Shop #${s.id}` }];
+        }
+      }
+
+      setShops(loaded);
+      if (loaded.length > 0) {
+        setForm(prev => ({ ...prev, shopId: String(loaded[0].id) }));
+      }
+    } catch (e) {
+      // ignore parsing errors, keep shops empty
+    }
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -41,6 +72,10 @@ export default function AddProduct() {
 
   const handleCategoryChange = (value: string) => {
     setForm(prev => ({ ...prev, category: value }));
+  };
+
+  const handleShopChange = (value: string) => {
+    setForm(prev => ({ ...prev, shopId: value }));
   };
 
   const handleImageLinkChange = (index: number, value: string) => {
@@ -161,10 +196,24 @@ export default function AddProduct() {
                   </Select>
                 </div>
 
-                {/* Optional: if backend requires explicit shopId */}
+                {/* Shop selection (from data loaded at login) */}
                 <div className="space-y-2">
-                  <Label htmlFor="shopId">Shop ID (optional)</Label>
-                  <Input id="shopId" name="shopId" type="number" value={form.shopId} onChange={handleChange} />
+                  <Label>Shop</Label>
+                  <Select value={form.shopId} onValueChange={handleShopChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={shops.length ? "Select your shop" : "No shop found"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {shops.map(s => (
+                        <SelectItem key={s.id} value={String(s.id)}>
+                          {s.shopName || `Shop #${s.id}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {!shops.length && (
+                    <p className="text-sm text-muted-foreground">Shop not loaded. Please revisit dashboard after login.</p>
+                  )}
                 </div>
               </div>
 
