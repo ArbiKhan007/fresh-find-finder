@@ -7,7 +7,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ShopRegistration from "./pages/ShopRegistration";
-import CustomerDashboard from "./pages/customer/Dashboard";
+import CustomerDashboardLoader from "./pages/customer/DashboardLoader";
 import ShopkeeperDashboardLoader from "./pages/shopkeeper/DashboardLoader";
 import AddProduct from "./pages/shopkeeper/AddProduct";
 import Products from "./pages/shopkeeper/Products";
@@ -37,7 +37,7 @@ const App = () => (
           <Route path="/shop-registration" element={<ShopRegistration />} />
           
           {/* Customer Routes */}
-          <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+          <Route path="/customer/dashboard" element={<CustomerDashboardLoader />} />
           
           {/* Shopkeeper Routes */}
           <Route path="/shopkeeper/dashboard" element={<ShopkeeperDashboardLoader />} />
