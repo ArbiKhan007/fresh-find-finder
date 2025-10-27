@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, MapPin, Store, ShoppingCart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,13 +8,64 @@ import CustomerLayout from "@/components/layouts/CustomerLayout";
 
 export default function CustomerDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [nearbyShops, setNearbyShops] = useState<Array<{ id: number; name: string; distance?: string; rating?: number }>>([]);
 
-  // Mock data - will be replaced with API calls
-  const nearbyShops = [
-    { id: 1, name: "Fresh Mart", distance: "0.5 km", rating: 4.5, image: "/placeholder.svg" },
-    { id: 2, name: "Green Grocers", distance: "1.2 km", rating: 4.8, image: "/placeholder.svg" },
-    { id: 3, name: "Daily Needs", distance: "2.0 km", rating: 4.3, image: "/placeholder.svg" },
-  ];
+  // Load shops saved by CustomerDashboardLoader and be resilient to different response shapes
+  useEffect(() => {
+    const readShops = () => {
+      try {
+        const raw = localStorage.getItem("shops");
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+
+        // Support different shapes: array directly, or {data: []}, {content: []}, {items: []}
+        const arr = Array.isArray(parsed)
+          ? parsed
+          : Array.isArray(parsed?.data)
+          ? parsed.data
+          : Array.isArray(parsed?.content)
+          ? parsed.content
+          : Array.isArray(parsed?.items)
+          ? parsed.items
+          : [];
+
+        if (arr.length) {
+          setNearbyShops(
+            arr
+              .filter((s: any) => s && s.id != null)
+              .map((s: any) => ({
+                id: s.id,
+                name: s.shopName || s.name || `Shop #${s.id}`,
+                // Use whichever pincode field exists
+                distance: (s.pincode ?? s.shopPincode) ? `PIN ${s.pincode ?? s.shopPincode}` : undefined,
+                rating: 4.5,
+              }))
+          );
+        }
+      } catch {}
+    };
+
+    readShops();
+
+    // Re-read if another tab updates localStorage
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "shops") readShops();
+    };
+    window.addEventListener("storage", onStorage);
+
+    // Re-read when returning to tab (in case loader ran just before)
+    const onFocus = () => readShops();
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, []);
+
+  const filteredShops = nearbyShops.filter((s) =>
+    s.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <CustomerLayout>
@@ -46,7 +97,7 @@ export default function CustomerDashboard() {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {nearbyShops.map((shop) => (
+            {filteredShops.map((shop) => (
               <Card key={shop.id} className="hover:shadow-elegant transition-smooth cursor-pointer">
                 <CardHeader>
                   <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center">
@@ -54,11 +105,15 @@ export default function CustomerDashboard() {
                   </div>
                   <CardTitle>{shop.name}</CardTitle>
                   <CardDescription className="flex items-center gap-4">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      {shop.distance}
-                    </span>
-                    <Badge variant="secondary">⭐ {shop.rating}</Badge>
+                    {shop.distance && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4" />
+                        {shop.distance}
+                      </span>
+                    )}
+                    {shop.rating != null && (
+                      <Badge variant="secondary">⭐ {shop.rating}</Badge>
+                    )}
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
