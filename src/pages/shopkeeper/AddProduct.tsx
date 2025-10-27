@@ -103,21 +103,25 @@ export default function AddProduct() {
         throw new Error("Please add at least one product image link.");
       }
 
-      // Integrate provided endpoint
+      // Build payload matching AddProductDto structure exactly
       const payload = {
-        productName: form.productName,
-        productSpecification: form.productSpecification,
-        manufacturer: form.manufacturer,
-        price: form.price,
+        productName: form.productName.trim(),
+        productSpecification: form.productSpecification.trim(),
+        manufacturer: form.manufacturer.trim(),
+        price: form.price.trim(),
         discount: parseFloat(form.discount || "0"),
-        category: form.category,
         shopId: parseInt(form.shopId),
-        // Send productImageLinks without id field - Spring Boot will auto-generate
-        productImageLinks: nonEmptyLinks.map(link => ({ imageLink: link }))
+        category: form.category.trim(),
+        productImageLinks: nonEmptyLinks.map(link => ({
+          imageLink: link
+        }))
       };
 
-      // Debug: inspect the exact payload being sent
-      console.log("AddProduct payload:", JSON.stringify(payload, null, 2));
+      // Debug logging
+      console.log("=== AddProduct Payload ===");
+      console.log(JSON.stringify(payload, null, 2));
+      console.log("productImageLinks count:", payload.productImageLinks.length);
+      console.log("productImageLinks:", payload.productImageLinks);
 
       const response = await fetch("http://localhost:8080/api/v1/shop/product/add", {
         method: "POST",
