@@ -12,9 +12,12 @@ export default function Signup() {
     name: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    role: "customer",
-    phone: "",
+    phoneNumber: "",
+    pincode: "",
+    addressLine1: "",
+    addressLine2: "",
+    addressLine3: "",
+    gender: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,8 +35,8 @@ export default function Signup() {
               <ShoppingBag className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-          <CardDescription>Join our grocery delivery platform</CardDescription>
+          <CardTitle className="text-2xl font-bold">Create Customer Account</CardTitle>
+          <CardDescription>Join our grocery delivery platform as a customer</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -59,27 +62,15 @@ export default function Signup() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phoneNumber">Phone Number</Label>
               <Input
-                id="phone"
+                id="phoneNumber"
                 type="tel"
-                placeholder="+1 (555) 000-0000"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="1234567890"
+                value={formData.phoneNumber}
+                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                 required
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">I am a</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="customer">Customer</SelectItem>
-                  <SelectItem value="shopkeeper">Shopkeeper</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -93,14 +84,55 @@ export default function Signup() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="gender">Gender</Label>
+              <Select value={formData.gender} onValueChange={(value) => setFormData({ ...formData, gender: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pincode">Pincode</Label>
               <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                id="pincode"
+                type="number"
+                placeholder="123456"
+                value={formData.pincode}
+                onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="addressLine1">Address Line 1</Label>
+              <Input
+                id="addressLine1"
+                placeholder="Street address"
+                value={formData.addressLine1}
+                onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="addressLine2">Address Line 2</Label>
+              <Input
+                id="addressLine2"
+                placeholder="Apartment, suite, etc."
+                value={formData.addressLine2}
+                onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="addressLine3">Address Line 3</Label>
+              <Input
+                id="addressLine3"
+                placeholder="City, State"
+                value={formData.addressLine3}
+                onChange={(e) => setFormData({ ...formData, addressLine3: e.target.value })}
               />
             </div>
           </CardContent>
