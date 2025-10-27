@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, MapPin, Store, ShoppingCart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import CustomerLayout from "@/components/layouts/CustomerLayout";
 export default function CustomerDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [nearbyShops, setNearbyShops] = useState<Array<{ id: number; name: string; distance?: string; rating?: number }>>([]);
+  const navigate = useNavigate();
 
   // Load shops saved by CustomerDashboardLoader and be resilient to different response shapes
   useEffect(() => {
@@ -117,7 +119,7 @@ export default function CustomerDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button className="w-full">
+                  <Button className="w-full" onClick={() => navigate(`/customer/shops/${shop.id}/products`)}>
                     <ShoppingCart className="h-4 w-4 mr-2" />
                     Shop Now
                   </Button>
