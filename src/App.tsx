@@ -10,6 +10,7 @@ import ShopRegistration from "./pages/ShopRegistration";
 import CustomerDashboard from "./pages/customer/Dashboard";
 import ShopkeeperDashboardLoader from "./pages/shopkeeper/DashboardLoader";
 import AddProduct from "./pages/shopkeeper/AddProduct";
+import Products from "./pages/shopkeeper/Products";
 import CoordinatorDashboard from "./pages/coordinator/Dashboard";
 import CoordinatorRegistrationRequests from "./pages/coordinator/RegistrationRequests";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -40,6 +41,7 @@ const App = () => (
           
           {/* Shopkeeper Routes */}
           <Route path="/shopkeeper/dashboard" element={<ShopkeeperDashboardLoader />} />
+          <Route path="/shopkeeper/products" element={<Products />} />
           <Route path="/shopkeeper/products/add" element={<AddProduct />} />
           
           {/* Service Desk Coordinator Routes */}
