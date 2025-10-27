@@ -112,12 +112,12 @@ export default function AddProduct() {
         discount: parseFloat(form.discount || "0"),
         category: form.category,
         shopId: parseInt(form.shopId),
-        // Some Spring binders ignore nested objects without an id; include id: 0 to be explicit
-        productImageLinks: nonEmptyLinks.map(link => ({ id: 0, imageLink: link }))
+        // Send productImageLinks without id field - Spring Boot will auto-generate
+        productImageLinks: nonEmptyLinks.map(link => ({ imageLink: link }))
       };
 
       // Debug: inspect the exact payload being sent
-      console.debug("AddProduct payload:", payload);
+      console.log("AddProduct payload:", JSON.stringify(payload, null, 2));
 
       const response = await fetch("http://localhost:8080/api/v1/shop/product/add", {
         method: "POST",
