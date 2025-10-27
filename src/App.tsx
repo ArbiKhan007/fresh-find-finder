@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ShopRegistration from "./pages/ShopRegistration";
 import CustomerDashboardLoader from "./pages/customer/DashboardLoader";
+import ShopProducts from "./pages/customer/ShopProducts";
 import ShopkeeperDashboardLoader from "./pages/shopkeeper/DashboardLoader";
 import AddProduct from "./pages/shopkeeper/AddProduct";
 import Products from "./pages/shopkeeper/Products";
@@ -38,6 +39,7 @@ const App = () => (
           
           {/* Customer Routes */}
           <Route path="/customer/dashboard" element={<CustomerDashboardLoader />} />
+          <Route path="/customer/shops/:id/products" element={<ShopProducts />} />
           
           {/* Shopkeeper Routes */}
           <Route path="/shopkeeper/dashboard" element={<ShopkeeperDashboardLoader />} />
