@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ShoppingBag } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Signup() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,10 +24,46 @@ export default function Signup() {
     gender: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // API integration will go here
-    console.log("Signup:", formData);
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        phoneNumber: formData.phoneNumber ? parseInt(formData.phoneNumber) : undefined,
+        pincode: formData.pincode ? parseInt(formData.pincode) : undefined,
+        addressLine1: formData.addressLine1.trim(),
+        addressLine2: (formData.addressLine2 || "").trim(),
+        addressLine3: (formData.addressLine3 || "").trim(),
+        gender: formData.gender,
+      };
+
+      const res = await fetch("http://localhost:8080/api/v1/customer/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const msg = await res.text().catch(() => "Signup failed");
+        throw new Error(msg || "Signup failed");
+      }
+
+      toast({ title: "Account created", description: "You can now sign in." });
+      navigate("/login");
+    } catch (err) {
+      console.error("Signup error", err);
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to create account",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -137,8 +177,8 @@ export default function Signup() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full">
-              Create Account
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Account"}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               Already have an account?{" "}
