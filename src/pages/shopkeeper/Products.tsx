@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Package, Plus, Tag, TrendingDown } from "lucide-react";
 
 interface ProductImageLink {
@@ -65,9 +66,11 @@ export default function Products() {
     loadProducts();
   }, [toast]);
 
-  const getProductImage = (product: Product): string => {
-    const validLinks = product.productImageLinks?.filter(img => img.imageLink?.trim());
-    return validLinks?.[0]?.imageLink || "/placeholder.svg";
+  const getProductImages = (product: Product): string[] => {
+    const validLinks = product.productImageLinks
+      ?.filter(img => img.imageLink?.trim())
+      ?.map(img => img.imageLink as string) || [];
+    return validLinks.length > 0 ? validLinks : ["/placeholder.svg"];
   };
 
   const calculateDiscountedPrice = (price: string, discount: number): string => {
@@ -123,18 +126,41 @@ export default function Products() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
+            {products.map((product) => {
+              const images = getProductImages(product);
+              return (
               <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <CardHeader className="p-0">
-                  <div className="aspect-square w-full overflow-hidden bg-muted">
-                    <img
-                      src={getProductImage(product)}
-                      alt={product.productName}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = "/placeholder.svg";
-                      }}
-                    />
+                  <div className="aspect-square w-full overflow-hidden bg-muted relative">
+                    {images.length === 1 ? (
+                      <img
+                        src={images[0]}
+                        alt={product.productName}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/placeholder.svg";
+                        }}
+                      />
+                    ) : (
+                      <Carousel className="w-full h-full">
+                        <CarouselContent>
+                          {images.map((image, idx) => (
+                            <CarouselItem key={idx}>
+                              <img
+                                src={image}
+                                alt={`${product.productName} - Image ${idx + 1}`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = "/placeholder.svg";
+                                }}
+                              />
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="left-2" />
+                        <CarouselNext className="right-2" />
+                      </Carousel>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 space-y-3">
@@ -179,7 +205,8 @@ export default function Products() {
                   <Button variant="outline" className="flex-1">Delete</Button>
                 </CardFooter>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
