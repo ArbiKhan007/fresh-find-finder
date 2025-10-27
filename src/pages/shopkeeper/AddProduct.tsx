@@ -97,20 +97,32 @@ export default function AddProduct() {
         throw new Error("Please select your shop before adding a product.");
       }
 
+      // Validate at least one image link
+      const nonEmptyLinks = form.imageLinks.map(l => l.trim()).filter(Boolean);
+      if (nonEmptyLinks.length === 0) {
+        throw new Error("Please add at least one product image link.");
+      }
+
       // Integrate provided endpoint
+      const payload = {
+        productName: form.productName,
+        productSpecification: form.productSpecification,
+        manufacturer: form.manufacturer,
+        price: form.price,
+        discount: parseFloat(form.discount || "0"),
+        category: form.category,
+        shopId: parseInt(form.shopId),
+        // Some Spring binders ignore nested objects without an id; include id: 0 to be explicit
+        productImageLinks: nonEmptyLinks.map(link => ({ id: 0, imageLink: link }))
+      };
+
+      // Debug: inspect the exact payload being sent
+      console.debug("AddProduct payload:", payload);
+
       const response = await fetch("http://localhost:8080/api/v1/shop/product/add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productName: form.productName,
-          productSpecification: form.productSpecification,
-          manufacturer: form.manufacturer,
-          price: form.price,
-          discount: parseFloat(form.discount || "0"),
-          category: form.category,
-          shopId: form.shopId ? parseInt(form.shopId) : undefined,
-          productImageLinks: form.imageLinks.filter(Boolean).map(link => ({ imageLink: link }))
-        })
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
