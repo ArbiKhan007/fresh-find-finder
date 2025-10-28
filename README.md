@@ -1,73 +1,132 @@
-# Welcome to your Lovable project
+# Fresh Find Finder
 
-## Project info
+A Vite + React + TypeScript web app for a hyperlocal grocery marketplace. It supports multiple roles (Customer, Shopkeeper, Coordinator, Admin, Maint) and integrates with a Spring Boot backend.
 
-**URL**: https://lovable.dev/projects/696a1d39-0969-4e8b-9dc3-0bc5b6c0b237
+## Features
 
-## How can I edit this code?
+- **Customer**
+  - Sign up and sign in
+  - Auto-load nearby shops by pincode
+  - View products of a selected shop
+- **Shopkeeper**
+  - Shop registration and login
+  - Preload shop details after login
+  - Add new products with images
+  - View/manage products
+- **Coordinator/Admin/Maint**
+  - Dashboards and invitation/registration flows (scaffolded)
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- React 18, TypeScript, Vite
+- React Router v6
+- shadcn/ui + Radix UI + Tailwind CSS
+- TanStack Query (for query client provider)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/696a1d39-0969-4e8b-9dc3-0bc5b6c0b237) and start prompting.
+See exact versions in `package.json`.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Prerequisites
 
-**Use your preferred IDE**
+- Node.js 18+ and npm (or bun) installed
+- Backend API running locally at `http://localhost:8080`
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+```bash
+# 1. Install dependencies
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 2. Start the dev server
 npm run dev
+
+# 3. Lint (optional)
+npm run lint
 ```
 
-**Edit a file directly in GitHub**
+Open http://localhost:5173 in your browser (Vite will print the actual URL/port).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Environment / Backend
 
-**Use GitHub Codespaces**
+The app expects a Spring Boot backend on `http://localhost:8080` with the following endpoints used so far:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Auth & Users
+  - `POST /api/v1/user/signin` — Login, stores user in `localStorage["user"]`
+  - `POST /api/v1/customer/signup` — Customer signup
 
-## What technologies are used for this project?
+- Shops
+  - `GET /api/v1/shop/get/shopkeeper/{id}` — Load shop by shopkeeper user id (stored in `localStorage["shop"]`)
+  - `GET /api/v1/shop/pincode/{pincode}` — Load shops by pincode (stored in `localStorage["shops"]`)
 
-This project is built with:
+- Products
+  - `POST /api/v1/shop/product/add` — Add product
+  - `GET /api/v1/shop/{shopId}/products` — List shop products
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+If your backend host/port differs, update the fetch URLs in the relevant pages under `src/pages/`.
 
-## How can I deploy this project?
+## Routing Overview
 
-Simply open [Lovable](https://lovable.dev/projects/696a1d39-0969-4e8b-9dc3-0bc5b6c0b237) and click on Share -> Publish.
+- Public
+  - `/` — Landing
+  - `/login` — Login
+  - `/signup` — Customer signup
+  - `/shop-registration` — Shopkeeper+Shop registration
 
-## Can I connect a custom domain to my Lovable project?
+- Customer
+  - `/customer/dashboard` — Loads shops by pincode (via `CustomerDashboardLoader`)
+  - `/customer/shops/:id/products` — View products for a selected shop
 
-Yes, you can!
+- Shopkeeper
+  - `/shopkeeper/dashboard` — Preloads shop by shopkeeper id (via `ShopkeeperDashboardLoader`)
+  - `/shopkeeper/products` — Shopkeeper products list
+  - `/shopkeeper/products/add` — Add product form
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Local Storage Keys
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- `user` — Set after login; includes `userType`, `id`, `pincode`, etc.
+- `shop` — Loaded for shopkeeper (shop details)
+- `shops` — Loaded for customer (shops by pincode)
+
+## Project Structure
+
+```text
+src/
+  components/
+    layouts/           # Common layouts for roles
+    ui/                # shadcn/ui components
+  hooks/               # Toast, etc.
+  pages/
+    customer/
+      Dashboard.tsx
+      DashboardLoader.tsx
+      ShopProducts.tsx
+    shopkeeper/
+      Dashboard.tsx
+      DashboardLoader.tsx
+      Products.tsx
+      AddProduct.tsx
+    admin/, coordinator/, maint/
+  App.tsx              # Routes
+```
+
+## Development Notes
+
+- API base URLs are currently inlined in components (e.g., `fetch("http://localhost:8080/...`)`). Consider moving to a config file or environment variables.
+- `localStorage` is used as a simple store for user/shop/shop lists. For larger features, consider React Context or a state library.
+- When integrating new endpoints, keep DTOs aligned with the backend contract.
+
+## Scripts
+
+- `npm run dev` — Start dev server
+- `npm run build` — Production build
+- `npm run preview` — Preview built app
+- `npm run lint` — Lint the project
+
+## Contributing
+
+1. Create a feature branch from `main`
+2. Commit with clear messages
+3. Open a PR and describe changes, screenshots, and testing steps
+
+## License
+
+This project is licensed under your organization’s preferred license. Update this section as needed.
