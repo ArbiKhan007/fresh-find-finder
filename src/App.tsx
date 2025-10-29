@@ -10,8 +10,8 @@ import Signup from "./pages/Signup";
 import ShopRegistration from "./pages/ShopRegistration";
 import CustomerDashboardLoader from "./pages/customer/DashboardLoader";
 import ShopProducts from "./pages/customer/ShopProducts";
-import CartPage from "./pages/customer/Cart";
-import CheckoutPage from "./pages/customer/Checkout";
+import ProfilePage from "./pages/customer/Profile";
+import PurchasesPage from "./pages/customer/Purchases";
 import ShopkeeperDashboardLoader from "./pages/shopkeeper/DashboardLoader";
 import AddProduct from "./pages/shopkeeper/AddProduct";
 import Products from "./pages/shopkeeper/Products";
@@ -44,8 +44,8 @@ const App = () => (
           {/* Customer Routes */}
           <Route path="/customer/dashboard" element={<CustomerDashboardLoader />} />
           <Route path="/customer/shops/:id/products" element={<ShopProducts />} />
-          <Route path="/customer/cart" element={<CartPage />} />
-          <Route path="/customer/checkout" element={<CheckoutPage />} />
+          <Route path="/customer/profile" element={<ProfilePage />} />
+          <Route path="/customer/purchases" element={<PurchasesPage />} />
           
           {/* Shopkeeper Routes */}
           <Route path="/shopkeeper/dashboard" element={<ShopkeeperDashboardLoader />} />
