@@ -4,9 +4,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, Minus, ShoppingCart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function CartPage() {
   const { items, removeItem, updateQty, clear, subtotal } = useCart();
+  const navigate = useNavigate();
 
   return (
     <CustomerLayout>
@@ -104,7 +106,7 @@ export default function CartPage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">Proceed to Checkout</Button>
+                  <Button className="w-full" onClick={() => navigate("/customer/checkout")}>Proceed to Checkout</Button>
                 </CardFooter>
               </Card>
             </div>
