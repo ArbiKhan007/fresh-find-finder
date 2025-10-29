@@ -45,9 +45,11 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                   </span>
                 )}
               </Link>
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-              </Button>
+              <Link to="/customer/profile">
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
