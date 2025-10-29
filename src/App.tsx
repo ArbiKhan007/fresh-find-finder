@@ -12,6 +12,8 @@ import CustomerDashboardLoader from "./pages/customer/DashboardLoader";
 import ShopProducts from "./pages/customer/ShopProducts";
 import ProfilePage from "./pages/customer/Profile";
 import PurchasesPage from "./pages/customer/Purchases";
+import CartPage from "./pages/customer/Cart";
+import CheckoutPage from "./pages/customer/Checkout";
 import ShopkeeperDashboardLoader from "./pages/shopkeeper/DashboardLoader";
 import AddProduct from "./pages/shopkeeper/AddProduct";
 import Products from "./pages/shopkeeper/Products";
@@ -46,6 +48,8 @@ const App = () => (
           <Route path="/customer/shops/:id/products" element={<ShopProducts />} />
           <Route path="/customer/profile" element={<ProfilePage />} />
           <Route path="/customer/purchases" element={<PurchasesPage />} />
+          <Route path="/customer/cart" element={<CartPage />} />
+          <Route path="/customer/checkout" element={<CheckoutPage />} />
           
           {/* Shopkeeper Routes */}
           <Route path="/shopkeeper/dashboard" element={<ShopkeeperDashboardLoader />} />
