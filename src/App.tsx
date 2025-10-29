@@ -12,21 +12,21 @@ import CustomerDashboardLoader from "./pages/customer/DashboardLoader";
 import ShopProducts from "./pages/customer/ShopProducts";
 import ProfilePage from "./pages/customer/Profile";
 import PurchasesPage from "./pages/customer/Purchases";
-import CartPage from "./pages/customer/Cart";
-import CheckoutPage from "./pages/customer/Checkout";
 import ShopkeeperDashboardLoader from "./pages/shopkeeper/DashboardLoader";
 import AddProduct from "./pages/shopkeeper/AddProduct";
 import Products from "./pages/shopkeeper/Products";
-import OrdersPage from "./pages/shopkeeper/Orders";
 import CoordinatorDashboard from "./pages/coordinator/Dashboard";
 import CoordinatorRegistrationRequests from "./pages/coordinator/RegistrationRequests";
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminProfilePage from "./pages/admin/Profile";
 import AdminInviteCoordinator from "./pages/admin/InviteCoordinator";
 import AdminRegistrationRequests from "./pages/admin/RegistrationRequests";
 import MaintDashboard from "./pages/maint/Dashboard";
+import MaintProfilePage from "./pages/maint/Profile";
 import MaintInviteAdmin from "./pages/maint/InviteAdmin";
 import MaintInviteCoordinator from "./pages/maint/InviteCoordinator";
 import MaintRegistrationRequests from "./pages/maint/RegistrationRequests";
+import CoordinatorProfilePage from "./pages/coordinator/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,26 +49,26 @@ const App = () => (
           <Route path="/customer/shops/:id/products" element={<ShopProducts />} />
           <Route path="/customer/profile" element={<ProfilePage />} />
           <Route path="/customer/purchases" element={<PurchasesPage />} />
-          <Route path="/customer/cart" element={<CartPage />} />
-          <Route path="/customer/checkout" element={<CheckoutPage />} />
           
           {/* Shopkeeper Routes */}
           <Route path="/shopkeeper/dashboard" element={<ShopkeeperDashboardLoader />} />
           <Route path="/shopkeeper/products" element={<Products />} />
           <Route path="/shopkeeper/products/add" element={<AddProduct />} />
-          <Route path="/shopkeeper/orders" element={<OrdersPage />} />
           
           {/* Service Desk Coordinator Routes */}
           <Route path="/coordinator/dashboard" element={<CoordinatorDashboard />} />
           <Route path="/coordinator/registration-requests" element={<CoordinatorRegistrationRequests />} />
+          <Route path="/coordinator/profile" element={<CoordinatorProfilePage />} />
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/profile" element={<AdminProfilePage />} />
           <Route path="/admin/invite-coordinator" element={<AdminInviteCoordinator />} />
           <Route path="/admin/registration-requests" element={<AdminRegistrationRequests />} />
           
           {/* Maint (Superuser) Routes */}
           <Route path="/maint/dashboard" element={<MaintDashboard />} />
+          <Route path="/maint/profile" element={<MaintProfilePage />} />
           <Route path="/maint/invite-admin" element={<MaintInviteAdmin />} />
           <Route path="/maint/invite-coordinator" element={<MaintInviteCoordinator />} />
           <Route path="/maint/registration-requests" element={<MaintRegistrationRequests />} />
