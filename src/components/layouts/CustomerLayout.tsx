@@ -1,8 +1,10 @@
 import { ShoppingBag, Search, ShoppingCart, User, Home, Store } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/use-cart";
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
+  const { count } = useCart();
   return (
     <div className="min-h-screen bg-background">
       <nav className="border-b bg-card/50 backdrop-blur sticky top-0 z-50">
@@ -31,9 +33,18 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon">
-                <ShoppingCart className="h-5 w-5" />
-              </Button>
+              <Link to="/customer/cart" className="relative">
+                <Button asChild variant="ghost" size="icon">
+                  <span>
+                    <ShoppingCart className="h-5 w-5" />
+                  </span>
+                </Button>
+                {count > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] px-1 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">
+                    {count}
+                  </span>
+                )}
+              </Link>
               <Button variant="ghost" size="icon">
                 <User className="h-5 w-5" />
               </Button>
