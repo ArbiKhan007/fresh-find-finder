@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Package, Tag, TrendingDown, Store } from "lucide-react";
+import { useCart } from "@/hooks/use-cart";
 
 interface ProductImageLink {
   id?: number;
@@ -30,6 +31,7 @@ export default function ShopProducts() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { addItem } = useCart();
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -160,7 +162,25 @@ export default function ShopProducts() {
                     </div>
                   </CardContent>
                   <CardFooter className="p-4 pt-0">
-                    <Button className="w-full">Add to Cart</Button>
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        addItem({
+                          id: product.id,
+                          productName: product.productName,
+                          price: product.price,
+                          discount: product.discount,
+                          image: getProductImages(product)[0],
+                          category: product.category,
+                          manufacturer: product.manufacturer,
+                          shopId: id ? parseInt(id) : undefined,
+                          quantity: 1,
+                        });
+                        toast({ title: "Added to cart", description: product.productName });
+                      }}
+                    >
+                      Add to Cart
+                    </Button>
                   </CardFooter>
                 </Card>
               );
