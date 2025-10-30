@@ -9,6 +9,38 @@ import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
+// Backend DTO types for clarity
+interface OrderProductDto {
+  pid: number;
+  quantity: number;
+  price: number; // unit price to charge (post-discount)
+}
+
+type PaymentMode = "COD" | "CREDIT_CARD" | "DEBIT_CARD" | "UPI";
+
+interface PlaceOrderDto {
+  totalPrice: number;
+  customerId: number;
+  shopId: number;
+  recieverName: string;
+  phoneNumber: number;
+  pincode: number;
+  addressLine1: string;
+  addressLine2: string;
+  addressLine3: string;
+  paymentMode: PaymentMode;
+  orderProductList: OrderProductDto[];
+}
+
+// Safe JSON.parse helper
+function safeJsonParse<T = unknown>(str: string): T | undefined {
+  try {
+    return JSON.parse(str) as T;
+  } catch {
+    return undefined;
+  }
+}
+
 interface AddressForm {
   name: string;
   phoneNumber: string;
@@ -18,11 +50,23 @@ interface AddressForm {
   pincode: string;
 }
 
+interface LocalUser {
+  id?: number;
+  customerId?: number;
+  name?: string;
+  phoneNumber?: number | string;
+  addressLine1?: string;
+  addressLine2?: string;
+  addressLine3?: string;
+  pincode?: number | string;
+}
+
 export default function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [paymentMethod, setPaymentMethod] = useState("cod");
+  type PaymentSelection = "cod" | "credit_card" | "debit_card" | "upi";
+  const [paymentMethod, setPaymentMethod] = useState<PaymentSelection>("cod");
   const [addr, setAddr] = useState<AddressForm>({
     name: "",
     phoneNumber: "",
@@ -50,10 +94,16 @@ export default function CheckoutPage() {
     } catch {}
   }, []);
 
-  // Ensure items are from a single shop (optional enforcement)
-  const shopId = useMemo(() => {
-    const ids = Array.from(new Set(items.map((i) => i.shopId).filter(Boolean)));
-    return ids.length === 1 ? ids[0] : undefined;
+  // Group items by shopId so each shop creates a separate order
+  const groupedByShop = useMemo(() => {
+    const groups = new Map<number, typeof items>();
+    for (const it of items) {
+      if (typeof it.shopId !== "number") continue; // skip if no shopId
+      const arr = groups.get(it.shopId) ?? [];
+      arr.push(it);
+      groups.set(it.shopId, arr);
+    }
+    return groups;
   }, [items]);
 
   const placeOrder = async () => {
@@ -65,26 +115,83 @@ export default function CheckoutPage() {
       toast({ title: "Missing address details", description: "Please fill required fields." , variant: "destructive"});
       return;
     }
+    // Resolve customerId from localStorage user
+    const rawUser = localStorage.getItem("user");
+    const parsedUser = rawUser ? safeJsonParse<LocalUser>(rawUser) : undefined;
+    const customerId: number | undefined = parsedUser?.id ?? parsedUser?.customerId;
 
-    // Placeholder order creation. Replace with backend POST when available.
-    const order = {
-      shopId,
-      items: items.map((i) => ({ productId: i.id, quantity: i.quantity })),
-      amount: subtotal,
-      paymentMethod,
-      shippingAddress: addr,
-      createdAt: new Date().toISOString(),
-    };
+    if (!customerId) {
+      toast({ title: "User not identified", description: "Missing customer id.", variant: "destructive" });
+      return;
+    }
+
+    // Build payload: List<PlaceOrderDto>
+    const payload: PlaceOrderDto[] = [];
+    for (const [shopId, shopItems] of groupedByShop) {
+      const orderProductList: OrderProductDto[] = shopItems.map((i) => {
+        const base = parseFloat(i.price);
+        const unit = isNaN(base) ? 0 : base - (base * (i.discount || 0)) / 100;
+        return { pid: i.id, quantity: i.quantity, price: Number(unit.toFixed(2)) };
+      });
+
+      const totalPrice = orderProductList.reduce((sum, p) => sum + p.price * p.quantity, 0);
+      payload.push({
+        totalPrice: Number(totalPrice.toFixed(2)),
+        customerId,
+        shopId,
+        recieverName: addr.name,
+        phoneNumber: Number(addr.phoneNumber),
+        pincode: Number(addr.pincode),
+        addressLine1: addr.addressLine1,
+        addressLine2: addr.addressLine2,
+        addressLine3: addr.addressLine3,
+        paymentMode: paymentModeFromSelection(paymentMethod),
+        orderProductList,
+      });
+    }
+
+    if (payload.length === 0) {
+      toast({ title: "Missing shop information", description: "Items have no shopId.", variant: "destructive" });
+      return;
+    }
 
     try {
-      localStorage.setItem("lastOrder", JSON.stringify(order));
+      const res = await fetch("http://localhost:8080/api/v1/order/place", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const msg = await res.text().catch(() => "Failed to place order");
+        throw new Error(msg || "Failed to place order");
+      }
+      // Attempt to read created orders list if provided
+      const data = await res
+        .json()
+        .catch(() => undefined) as { id?: number }[] | undefined;
       clear();
-      toast({ title: "Order placed", description: "Order saved locally (demo)." });
+      const count = Array.isArray(data) ? data.length : payload.length;
+      toast({ title: "Order placed", description: `${count} order(s) created.` });
       navigate("/customer/dashboard");
     } catch (e) {
-      toast({ title: "Failed to place order", variant: "destructive" });
+      toast({ title: "Failed to place order", description: e instanceof Error ? e.message : undefined, variant: "destructive" });
     }
   };
+
+  function paymentModeFromSelection(sel: PaymentSelection): PaymentMode {
+    switch (sel) {
+      case "cod":
+        return "COD";
+      case "credit_card":
+        return "CREDIT_CARD";
+      case "debit_card":
+        return "DEBIT_CARD";
+      case "upi":
+        return "UPI";
+      default:
+        return "COD";
+    }
+  }
 
   return (
     <CustomerLayout>
@@ -139,8 +246,16 @@ export default function CheckoutPage() {
                   <Label htmlFor="cod">Cash on Delivery</Label>
                 </div>
                 <div className="flex items-center space-x-2 opacity-50 cursor-not-allowed">
-                  <RadioGroupItem value="card" id="card" disabled />
-                  <Label htmlFor="card">Card (coming soon)</Label>
+                  <RadioGroupItem value="credit_card" id="credit_card" disabled />
+                  <Label htmlFor="credit_card">Credit Card (coming soon)</Label>
+                </div>
+                <div className="flex items-center space-x-2 opacity-50 cursor-not-allowed">
+                  <RadioGroupItem value="debit_card" id="debit_card" disabled />
+                  <Label htmlFor="debit_card">Debit Card (coming soon)</Label>
+                </div>
+                <div className="flex items-center space-x-2 opacity-50 cursor-not-allowed">
+                  <RadioGroupItem value="upi" id="upi" disabled />
+                  <Label htmlFor="upi">UPI (coming soon)</Label>
                 </div>
               </RadioGroup>
             </CardContent>
