@@ -32,6 +32,10 @@ interface PlaceOrderDto {
   orderProductList: OrderProductDto[];
 }
 
+interface MultiPlaceOrderDto {
+  placeOrderDtoList: PlaceOrderDto[];
+}
+
 // Safe JSON.parse helper
 function safeJsonParse<T = unknown>(str: string): T | undefined {
   try {
@@ -159,7 +163,7 @@ export default function CheckoutPage() {
       const res = await fetch("http://localhost:8080/api/v1/order/place", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ placeOrderDtoList: payload } as MultiPlaceOrderDto),
       });
       if (!res.ok) {
         const msg = await res.text().catch(() => "Failed to place order");
