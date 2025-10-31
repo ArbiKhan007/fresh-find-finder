@@ -16,7 +16,6 @@ interface OrderProduct {
 }
 
 interface ShopLite { id?: number; name?: string }
-interface UserLite { id?: number; name?: string }
 
 interface Order {
   id: number;
@@ -46,7 +45,6 @@ interface ProductDetails {
   productImageLinks?: Array<{ id?: number; url?: string } | string>;
 }
 
-export default function CustomerOrderDetailsPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -76,7 +74,7 @@ export default function CustomerOrderDetailsPage() {
     load();
   }, [orderId, toast]);
 
-  function normalizeOrder(raw: any): Order {
+  const normalizeOrder = (raw: any): Order => {
     const list = raw?.orderProductList ?? raw?.orderProducts ?? [];
     const orderProductList: OrderProduct[] = Array.isArray(list)
       ? list.map((op: any) => ({
@@ -104,8 +102,19 @@ export default function CustomerOrderDetailsPage() {
       shop: raw?.shop,
       customer: raw?.customer,
     } as Order;
-  }
+  };
 
+  const toggleItem = async (pid: number) => {
+    setExpanded((prev) => ({ ...prev, [pid]: !prev[pid] }));
+    if (!products[pid]) {
+      try {
+        const res = await fetch(`http://localhost:8080/api/v1/shop/product/${pid}`);
+        if (!res.ok) return;
+        const p = (await res.json()) as ProductDetails;
+        setProducts((m) => ({ ...m, [pid]: p }));
+      } catch {}
+    }
+  };
   return (
     <CustomerLayout>
       <div className="space-y-6">
