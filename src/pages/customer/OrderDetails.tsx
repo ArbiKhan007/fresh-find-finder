@@ -65,20 +65,6 @@ export default function CustomerOrderDetailsPage() {
           const msg = await res.text().catch(() => "Failed to load order");
           throw new Error(msg || "Failed to load order");
         }
-
-  const toggleItem = async (pid: number) => {
-    setExpanded((prev) => ({ ...prev, [pid]: !prev[pid] }));
-    if (!products[pid]) {
-      try {
-        const res = await fetch(`http://localhost:8080/api/v1/shop/product/${pid}`);
-        if (!res.ok) throw new Error(await res.text());
-        const p = (await res.json()) as ProductDetails;
-        setProducts((m) => ({ ...m, [pid]: p }));
-      } catch (e) {
-        // ignore; fallback to PID
-      }
-    }
-  };
         const data = (await res.json()) as any;
         setOrder(normalizeOrder(data));
       } catch (e) {
