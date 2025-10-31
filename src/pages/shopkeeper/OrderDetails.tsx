@@ -35,13 +35,25 @@ interface Order {
   customer?: UserLite;
 }
 
+interface ProductDetails {
+  id: number;
+  productName?: string;
+  productSpecification?: string;
+  manufacturer?: string;
+  price?: number | string;
+  discount?: number;
+  category?: string;
+  productImageLinks?: Array<{ id?: number; url?: string } | string>;
+}
+
 export default function ShopOrderDetailsPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-  const [productMap, setProductMap] = useState<Record<number, { name?: string; imageUrl?: string }>>({});
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+  const [products, setProducts] = useState<Record<number, ProductDetails>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -63,34 +75,6 @@ export default function ShopOrderDetailsPage() {
     };
     load();
   }, [orderId, toast]);
-
-  useEffect(() => {
-    const loadProducts = async () => {
-      if (!order?.orderProductList?.length) return;
-      const ids = Array.from(new Set(order.orderProductList.map((i) => Number(i.pid)).filter(Boolean)));
-      if (ids.length === 0) return;
-      try {
-        const results = await Promise.all(
-          ids.map(async (id) => {
-            try {
-              const res = await fetch(`http://localhost:8080/api/v1/shop/product/${id}`);
-              if (!res.ok) throw new Error();
-              const p = await res.json();
-              return [id, { name: p?.productName || p?.name, imageUrl: p?.imageUrl || p?.image }] as const;
-            } catch {
-              return [id, { name: undefined, imageUrl: undefined }] as const;
-            }
-          })
-        );
-        const map: Record<number, { name?: string; imageUrl?: string }> = {};
-        results.forEach(([id, meta]) => (map[Number(id)] = meta));
-        setProductMap(map);
-      } catch {
-        // ignore; fallback to PID
-      }
-    };
-    loadProducts();
-  }, [order]);
 
   function normalizeOrder(raw: any): Order {
     const list = raw?.orderProductList ?? raw?.orderProducts ?? [];
@@ -180,10 +164,54 @@ export default function ShopOrderDetailsPage() {
               <CardContent className="space-y-3 text-sm">
                 {order.orderProductList?.length ? (
                   order.orderProductList.map((op) => (
-                    <div key={op.id} className="flex items-center justify-between border rounded p-3">
-                      <div className="text-muted-foreground">{productMap[Number(op.pid)]?.name || op.productName || `PID: ${op.pid}`}</div>
-                      <div className="text-muted-foreground">Qty: {op.quantity}</div>
-                      <div className="font-medium">₹{Number(op.price).toFixed(2)}</div>
+                    <div key={op.id} className="border rounded">
+                      <button
+                        type="button"
+                        onClick={() => toggleItem(Number(op.pid))}
+                        className="w-full flex items-center justify-between p-3 hover:bg-muted/40"
+                      >
+                        <div className="flex items-center gap-2 text-left">
+                          <span className="text-muted-foreground">
+                            {products[Number(op.pid)]?.productName || op.productName || `PID: ${op.pid}`}
+                          </span>
+                          <span className="text-xs text-muted-foreground">Qty: {op.quantity}</span>
+                        </div>
+                        <div className="font-medium">₹{Number(op.price).toFixed(2)}</div>
+                      </button>
+                      {expanded[Number(op.pid)] && (
+                        <div className="px-4 pb-4 text-sm space-y-2">
+                          <div className="grid md:grid-cols-2 gap-2 text-muted-foreground">
+                            <div>
+                              <span className="font-medium text-foreground">Manufacturer: </span>
+                              {products[Number(op.pid)]?.manufacturer || "—"}
+                            </div>
+                            <div>
+                              <span className="font-medium text-foreground">Category: </span>
+                              {products[Number(op.pid)]?.category || "—"}
+                            </div>
+                          </div>
+                          {products[Number(op.pid)]?.productSpecification && (
+                            <div className="text-muted-foreground">
+                              <span className="font-medium text-foreground">Specs: </span>
+                              {products[Number(op.pid)]?.productSpecification}
+                            </div>
+                          )}
+                          <div className="grid md:grid-cols-3 gap-2 text-muted-foreground">
+                            <div>
+                              <span className="font-medium text-foreground">MRP: </span>
+                              {products[Number(op.pid)]?.price ?? "—"}
+                            </div>
+                            <div>
+                              <span className="font-medium text-foreground">Discount: </span>
+                              {products[Number(op.pid)]?.discount ?? 0}%
+                            </div>
+                            <div>
+                              <span className="font-medium text-foreground">Subtotal: </span>
+                              ₹{(Number(op.price) * Number(op.quantity)).toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))
                 ) : (
