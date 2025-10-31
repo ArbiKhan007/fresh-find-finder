@@ -17,6 +17,7 @@ import PurchasesPage from "./pages/customer/Purchases";
 import ShopkeeperDashboardLoader from "./pages/shopkeeper/DashboardLoader";
 import AddProduct from "./pages/shopkeeper/AddProduct";
 import Products from "./pages/shopkeeper/Products";
+import ShopOrderDetailsPage from "./pages/shopkeeper/OrderDetails";
 import CoordinatorDashboard from "./pages/coordinator/Dashboard";
 import CoordinatorRegistrationRequests from "./pages/coordinator/RegistrationRequests";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/shopkeeper/dashboard" element={<ShopkeeperDashboardLoader />} />
           <Route path="/shopkeeper/products" element={<Products />} />
           <Route path="/shopkeeper/products/add" element={<AddProduct />} />
+          <Route path="/shopkeeper/orders/:orderId" element={<ShopOrderDetailsPage />} />
           
           {/* Service Desk Coordinator Routes */}
           <Route path="/coordinator" element={<Navigate to="/coordinator/dashboard" replace />} />
