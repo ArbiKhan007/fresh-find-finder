@@ -7,29 +7,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Package, User, Calendar, IndianRupee, RefreshCcw } from "lucide-react";
 
-interface OrderItem {
-  productId: number;
+// Backend-aligned typings
+interface OrderProduct {
+  id: number;
+  pid: number;
   quantity: number;
+  price: number; // unit price
 }
 
-interface ShippingAddress {
+interface CustomerLite {
+  id?: number;
   name?: string;
-  phoneNumber?: string;
-  addressLine1?: string;
-  addressLine2?: string;
-  addressLine3?: string;
-  pincode?: string | number;
 }
 
 interface Order {
   id: number | string;
-  shopId?: number;
-  items: OrderItem[];
-  amount: number;
-  paymentMethod: string;
-  shippingAddress?: ShippingAddress;
-  createdAt: string;
-  status?: string; // Pending | Accepted | Out for Delivery | Completed
+  totalPrice: number;
+  paymentMode?: string;
+  paymentState?: string;
+  placedDateTime?: string;
+  recieverName?: string;
+  orderProductList?: OrderProduct[];
+  customer?: CustomerLite;
+  status?: string; // Optional local/UI status
 }
 
 const STATUS_OPTIONS = [
@@ -61,22 +61,13 @@ export default function OrdersPage() {
     try {
       if (!shopId) throw new Error("Shop not found. Please log in again.");
 
-      // Try backend first (if available)
-      try {
-        const res = await fetch(`http://localhost:8080/api/v1/shop/${shopId}/orders`);
-        if (res.ok) {
-          const data: Order[] = await res.json();
-          setOrders(Array.isArray(data) ? data : []);
-          return;
-        }
-      } catch {
-        // ignore and fallback
+      const res = await fetch(`http://localhost:8080/api/v1/order/shop/${shopId}`);
+      if (!res.ok) {
+        const msg = await res.text().catch(() => "Failed to load orders");
+        throw new Error(msg || "Failed to load orders");
       }
-
-      // Fallback: load from localStorage demo bucket
-      const saved = localStorage.getItem("shopOrders");
-      if (saved) setOrders(JSON.parse(saved));
-      else setOrders([]);
+      const data: Order[] | null = await res.json();
+      setOrders(Array.isArray(data) ? data : []);
     } catch (e) {
       toast({ title: "Failed to load orders", description: e instanceof Error ? e.message : "", variant: "destructive" });
     } finally {
@@ -153,24 +144,24 @@ export default function OrdersPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">Order #{order.id}</CardTitle>
-                    <Badge variant="secondary">{order.paymentMethod?.toUpperCase?.() || ""}</Badge>
+                    <Badge variant="secondary">{(order.paymentMode || order.paymentState || "").toString()}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   <div className="grid md:grid-cols-4 gap-3">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="h-4 w-4" />
-                      <span>{new Date(order.createdAt).toLocaleString()}</span>
+                      <span>{order.placedDateTime ? new Date(order.placedDateTime).toLocaleString() : ""}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <IndianRupee className="h-4 w-4" />
-                      <span className="font-medium">₹{Number(order.amount || 0).toFixed(2)}</span>
+                      <span className="font-medium">₹{Number(order.totalPrice || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <User className="h-4 w-4" />
-                      <span>{order.shippingAddress?.name || "Customer"}</span>
+                      <span>{order.recieverName || order.customer?.name || "Customer"}</span>
                     </div>
-                    <div className="text-muted-foreground">{order.items?.length || 0} items</div>
+                    <div className="text-muted-foreground">{order.orderProductList?.length || 0} items</div>
                   </div>
 
                   <div className="flex items-center gap-3">
