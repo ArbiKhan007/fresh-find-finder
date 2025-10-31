@@ -66,6 +66,12 @@ const App = () => (
           <Route path="/coordinator/tickets" element={<CoordinatorDashboard />} />
           <Route path="/coordinator/registration-requests" element={<CoordinatorRegistrationRequests />} />
           <Route path="/coordinator/profile" element={<CoordinatorProfilePage />} />
+
+          {/* Aliases for coordinator userType from backend */}
+          <Route path="/service_coordinator" element={<Navigate to="/coordinator/dashboard" replace />} />
+          <Route path="/service-coordinator" element={<Navigate to="/coordinator/dashboard" replace />} />
+          <Route path="/service_desk_coordinator" element={<Navigate to="/coordinator/dashboard" replace />} />
+          <Route path="/service-desk-coordinator" element={<Navigate to="/coordinator/dashboard" replace />} />
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
