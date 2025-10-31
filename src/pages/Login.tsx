@@ -14,6 +14,31 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  function resolveRouteSegmentFromUserType(userType: unknown): string {
+    const raw = String(userType || "customer").toLowerCase();
+    // Normalize separators and known aliases
+    const norm = raw.replace(/\s+/g, "_");
+    switch (norm) {
+      case "customer":
+        return "customer";
+      case "shopkeeper":
+        return "shopkeeper";
+      case "coordinator":
+      case "service_coordinator":
+      case "service-desk-coordinator":
+      case "service_desk_coordinator":
+        return "coordinator";
+      case "admin":
+        return "admin";
+      case "maint":
+      case "superuser":
+      case "maintenance":
+        return "maint";
+      default:
+        return "customer";
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("🚀 Sign In button clicked - Starting API call...");
@@ -56,8 +81,8 @@ export default function Login() {
       });
 
       // Navigate based on userType
-      const userType = user.userType?.toLowerCase() || "customer";
-      navigate(`/${userType}/dashboard`);
+      const routeSegment = resolveRouteSegmentFromUserType(user.userType);
+      navigate(`/${routeSegment}/dashboard`);
     } catch (error) {
       console.error("❌ Login error:", error);
       toast({
