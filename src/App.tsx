@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "@/hooks/use-cart";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -60,7 +60,10 @@ const App = () => (
           <Route path="/shopkeeper/products/add" element={<AddProduct />} />
           
           {/* Service Desk Coordinator Routes */}
+          <Route path="/coordinator" element={<Navigate to="/coordinator/dashboard" replace />} />
           <Route path="/coordinator/dashboard" element={<CoordinatorDashboard />} />
+          <Route path="/coordinator/approvals" element={<CoordinatorRegistrationRequests />} />
+          <Route path="/coordinator/tickets" element={<CoordinatorDashboard />} />
           <Route path="/coordinator/registration-requests" element={<CoordinatorRegistrationRequests />} />
           <Route path="/coordinator/profile" element={<CoordinatorProfilePage />} />
           
