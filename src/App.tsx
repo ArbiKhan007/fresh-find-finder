@@ -14,6 +14,7 @@ import CartPage from "./pages/customer/Cart";
 import CheckoutPage from "./pages/customer/Checkout";
 import ProfilePage from "./pages/customer/Profile";
 import PurchasesPage from "./pages/customer/Purchases";
+import CustomerOrderDetailsPage from "./pages/customer/OrderDetails";
 import ShopkeeperDashboardLoader from "./pages/shopkeeper/DashboardLoader";
 import AddProduct from "./pages/shopkeeper/AddProduct";
 import Products from "./pages/shopkeeper/Products";
@@ -54,6 +55,7 @@ const App = () => (
           <Route path="/customer/checkout" element={<CheckoutPage />} />
           <Route path="/customer/profile" element={<ProfilePage />} />
           <Route path="/customer/purchases" element={<PurchasesPage />} />
+          <Route path="/customer/orders/:orderId" element={<CustomerOrderDetailsPage />} />
           
           {/* Shopkeeper Routes */}
           <Route path="/shopkeeper/dashboard" element={<ShopkeeperDashboardLoader />} />
