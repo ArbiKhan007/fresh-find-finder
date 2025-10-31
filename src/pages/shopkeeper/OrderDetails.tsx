@@ -12,7 +12,6 @@ interface OrderProduct {
   pid: number;
   quantity: number;
   price: number; // unit price
-  productName?: string;
 }
 
 interface ShopLite { id?: number; name?: string }
@@ -104,6 +103,21 @@ export default function ShopOrderDetailsPage() {
       shop: raw?.shop,
       customer: raw?.customer,
     } as Order;
+  }
+
+  async function toggleItem(pid: number) {
+    setExpanded((prev) => ({ ...prev, [pid]: !prev[pid] }));
+    if (!products[pid]) {
+      try {
+        const res = await fetch(`http://localhost:8080/api/v1/shop/product/${pid}`);
+        if (!res.ok) {
+          // swallow error; UI will fallback to PID
+          return;
+        }
+        const p = (await res.json()) as ProductDetails;
+        setProducts((m) => ({ ...m, [pid]: p }));
+      } catch {}
+    }
   }
 
   return (
@@ -225,3 +239,4 @@ export default function ShopOrderDetailsPage() {
     </ShopkeeperLayout>
   );
 }
+
