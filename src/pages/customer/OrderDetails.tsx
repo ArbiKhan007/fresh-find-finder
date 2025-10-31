@@ -33,6 +33,8 @@ interface Order {
   orderProductList?: OrderProduct[];
   shop?: ShopLite;
   customer?: UserLite;
+  deliveryStatus?: string;
+  deliveredDateTime?: string;
 }
 
 interface ProductDetails {
@@ -103,6 +105,8 @@ export default function CustomerOrderDetailsPage() {
       orderProductList,
       shop: raw?.shop,
       customer: raw?.customer,
+      deliveryStatus: raw?.deliveryStatus ?? raw?.status ?? raw?.paymentState,
+      deliveredDateTime: raw?.deliveredDateTime ?? raw?.deliveryDate ?? raw?.deliveredAt,
     } as Order;
   }
 
@@ -222,8 +226,14 @@ export default function CustomerOrderDetailsPage() {
                                   {products[Number(op.pid)]?.productSpecification}
                                 </div>
                               )}
-                              <div className="text-sm text-foreground font-medium">Delivered</div>
-                              <div className="text-xs text-muted-foreground">Return window closes soon</div>
+                              <div className="text-sm text-foreground font-medium">
+                                {(() => {
+                                  const status = order.deliveryStatus || order.paymentState || "Delivered";
+                                  const onDate = order.deliveredDateTime ? new Date(order.deliveredDateTime).toLocaleDateString() : null;
+                                  return onDate ? `${status} on ${onDate}` : status;
+                                })()}
+                              </div>
+                              <div className="text-xs text-muted-foreground">{order.deliveryStatus ? "Return window closes soon" : ""}</div>
 
                               <div className="mt-3 flex flex-wrap gap-2">
                                 <Button className="bg-yellow-400 text-black hover:bg-yellow-500">Buy it again</Button>
