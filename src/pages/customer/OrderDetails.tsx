@@ -16,6 +16,7 @@ interface OrderProduct {
 }
 
 interface ShopLite { id?: number; name?: string }
+interface UserLite { id?: number; name?: string }
 
 interface Order {
   id: number;
@@ -45,6 +46,7 @@ interface ProductDetails {
   productImageLinks?: Array<{ id?: number; url?: string } | string>;
 }
 
+export default function CustomerOrderDetailsPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
