@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ShopkeeperLayout from "@/components/layouts/ShopkeeperLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | number | null>(null);
+  const navigate = useNavigate();
 
   const shopId = useMemo(() => {
     try {
@@ -140,7 +142,7 @@ export default function OrdersPage() {
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
-              <Card key={order.id}>
+              <Card key={order.id} className="hover:shadow cursor-pointer" onClick={() => navigate(`/shopkeeper/orders/${order.id}`)}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">Order #{order.id}</CardTitle>
@@ -182,6 +184,7 @@ export default function OrdersPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <Button variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/shopkeeper/orders/${order.id}`); }}>View</Button>
                   </div>
                 </CardContent>
               </Card>
