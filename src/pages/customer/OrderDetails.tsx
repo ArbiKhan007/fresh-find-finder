@@ -76,7 +76,7 @@ export default function CustomerOrderDetailsPage() {
     load();
   }, [orderId, toast]);
 
-  const normalizeOrder = (raw: any): Order => {
+  function normalizeOrder(raw: any): Order {
     const list = raw?.orderProductList ?? raw?.orderProducts ?? [];
     const orderProductList: OrderProduct[] = Array.isArray(list)
       ? list.map((op: any) => ({
@@ -104,9 +104,18 @@ export default function CustomerOrderDetailsPage() {
       shop: raw?.shop,
       customer: raw?.customer,
     } as Order;
-  };
+  }
 
-  const toggleItem = async (pid: number) => {
+  function firstImageUrl(pid: number): string | undefined {
+    const links = products[pid]?.productImageLinks;
+    if (!links || !Array.isArray(links) || links.length === 0) return undefined;
+    const first = links[0] as any;
+    if (typeof first === "string") return first as string;
+    if (first && typeof first === "object" && (first.url || first.link)) return (first.url || first.link) as string;
+    return undefined;
+  }
+
+  async function toggleItem(pid: number) {
     setExpanded((prev) => ({ ...prev, [pid]: !prev[pid] }));
     if (!products[pid]) {
       try {
@@ -116,7 +125,8 @@ export default function CustomerOrderDetailsPage() {
         setProducts((m) => ({ ...m, [pid]: p }));
       } catch {}
     }
-  };
+  }
+
   return (
     <CustomerLayout>
       <div className="space-y-6">
@@ -190,24 +200,52 @@ export default function CustomerOrderDetailsPage() {
                         <div className="font-medium">₹{Number(op.price).toFixed(2)}</div>
                       </button>
                       {expanded[Number(op.pid)] && (
-                        <div className="px-4 pb-4 text-sm space-y-2">
-                          <div className="grid md:grid-cols-2 gap-2 text-muted-foreground">
-                            <div>
-                              <span className="font-medium text-foreground">Manufacturer: </span>
-                              {products[Number(op.pid)]?.manufacturer || "—"}
+                        <div className="px-4 pb-4">
+                          <div className="flex gap-4">
+                            <div className="w-20 h-20 rounded border bg-white overflow-hidden flex items-center justify-center">
+                              {firstImageUrl(Number(op.pid)) ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={firstImageUrl(Number(op.pid))} alt={products[Number(op.pid)]?.productName || op.productName || `PID: ${op.pid}`} className="w-full h-full object-contain" />
+                              ) : (
+                                <div className="text-xs text-muted-foreground">No image</div>
+                              )}
                             </div>
-                            <div>
-                              <span className="font-medium text-foreground">Category: </span>
-                              {products[Number(op.pid)]?.category || "—"}
+                            <div className="flex-1 space-y-1">
+                              <div className="flex items-start gap-2">
+                                <span className="font-medium text-foreground leading-snug">
+                                  {products[Number(op.pid)]?.productName || op.productName || `PID: ${op.pid}`}
+                                </span>
+                                <Badge variant="secondary" className="ml-2">x{op.quantity}</Badge>
+                              </div>
+                              {products[Number(op.pid)]?.productSpecification && (
+                                <div className="text-sm text-muted-foreground line-clamp-2">
+                                  {products[Number(op.pid)]?.productSpecification}
+                                </div>
+                              )}
+                              <div className="text-sm text-foreground font-medium">Delivered</div>
+                              <div className="text-xs text-muted-foreground">Return window closes soon</div>
+
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                <Button className="bg-yellow-400 text-black hover:bg-yellow-500">Buy it again</Button>
+                                <Button variant="outline">View your item</Button>
+                              </div>
+                            </div>
+                            <div className="hidden md:flex flex-col gap-2 w-56">
+                              <Button className="bg-yellow-400 text-black hover:bg-yellow-500">Get product support</Button>
+                              <Button variant="outline">Track package</Button>
+                              <Button variant="outline">Leave seller feedback</Button>
+                              <Button variant="outline">Leave delivery feedback</Button>
+                              <Button variant="outline">Write a product review</Button>
                             </div>
                           </div>
-                          {products[Number(op.pid)]?.productSpecification && (
-                            <div className="text-muted-foreground">
-                              <span className="font-medium text-foreground">Specs: </span>
-                              {products[Number(op.pid)]?.productSpecification}
-                            </div>
-                          )}
-                          <div className="grid md:grid-cols-3 gap-2 text-muted-foreground">
+                          <div className="mt-3 grid md:hidden gap-2">
+                            <Button className="bg-yellow-400 text-black hover:bg-yellow-500">Get product support</Button>
+                            <Button variant="outline">Track package</Button>
+                            <Button variant="outline">Leave seller feedback</Button>
+                            <Button variant="outline">Leave delivery feedback</Button>
+                            <Button variant="outline">Write a product review</Button>
+                          </div>
+                          <div className="mt-3 grid md:grid-cols-3 gap-2 text-muted-foreground text-sm">
                             <div>
                               <span className="font-medium text-foreground">MRP: </span>
                               {products[Number(op.pid)]?.price ?? "—"}
