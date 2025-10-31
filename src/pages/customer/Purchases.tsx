@@ -2,6 +2,7 @@ import CustomerLayout from "@/components/layouts/CustomerLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ShoppingBag, Calendar, CreditCard, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -32,6 +33,7 @@ export default function PurchasesPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -87,7 +89,7 @@ export default function PurchasesPage() {
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {orders.map((order) => (
-              <Card key={order.id}>
+              <Card key={order.id} className="hover:shadow cursor-pointer" onClick={() => navigate(`/customer/orders/${order.id}`)}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">Order #{order.id}</CardTitle>
