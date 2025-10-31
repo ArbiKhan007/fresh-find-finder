@@ -12,6 +12,7 @@ interface OrderProduct {
   pid: number;
   quantity: number;
   price: number; // unit price
+  productName?: string;
 }
 
 interface ShopLite { id?: number; name?: string }
@@ -51,8 +52,8 @@ export default function CustomerOrderDetailsPage() {
           const msg = await res.text().catch(() => "Failed to load order");
           throw new Error(msg || "Failed to load order");
         }
-        const data = (await res.json()) as Order;
-        setOrder(data);
+        const data = (await res.json()) as any;
+        setOrder(normalizeOrder(data));
       } catch (e) {
         toast({ title: "Unable to load order", description: e instanceof Error ? e.message : undefined, variant: "destructive" });
       } finally {
@@ -61,6 +62,36 @@ export default function CustomerOrderDetailsPage() {
     };
     load();
   }, [orderId, toast]);
+
+  function normalizeOrder(raw: any): Order {
+    const list = raw?.orderProductList ?? raw?.orderProducts ?? [];
+    const orderProductList: OrderProduct[] = Array.isArray(list)
+      ? list.map((op: any) => ({
+          id: op?.id ?? 0,
+          pid: op?.pid ?? op?.productId ?? op?.product?.id ?? 0,
+          quantity: op?.quantity ?? op?.qty ?? 0,
+          price: Number(op?.price ?? op?.unitPrice ?? op?.amount ?? 0),
+          productName: op?.productName ?? op?.product?.productName,
+        }))
+      : [];
+
+    return {
+      id: raw?.id,
+      totalPrice: Number(raw?.totalPrice ?? 0),
+      paymentMode: raw?.paymentMode,
+      paymentState: raw?.paymentState,
+      placedDateTime: raw?.placedDateTime,
+      recieverName: raw?.recieverName,
+      phoneNumber: raw?.phoneNumber,
+      pincode: raw?.pincode,
+      addressLine1: raw?.addressLine1,
+      addressLine2: raw?.addressLine2,
+      addressLine3: raw?.addressLine3,
+      orderProductList,
+      shop: raw?.shop,
+      customer: raw?.customer,
+    } as Order;
+  }
 
   return (
     <CustomerLayout>
@@ -121,7 +152,7 @@ export default function CustomerOrderDetailsPage() {
                 {order.orderProductList?.length ? (
                   order.orderProductList.map((op) => (
                     <div key={op.id} className="flex items-center justify-between border rounded p-3">
-                      <div className="text-muted-foreground">PID: {op.pid}</div>
+                      <div className="text-muted-foreground">{op.productName ? op.productName : `PID: ${op.pid}`}</div>
                       <div className="text-muted-foreground">Qty: {op.quantity}</div>
                       <div className="font-medium">₹{Number(op.price).toFixed(2)}</div>
                     </div>
