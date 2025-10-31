@@ -41,6 +41,7 @@ export default function ShopOrderDetailsPage() {
   const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [productMap, setProductMap] = useState<Record<number, { name?: string; imageUrl?: string }>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -62,6 +63,34 @@ export default function ShopOrderDetailsPage() {
     };
     load();
   }, [orderId, toast]);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      if (!order?.orderProductList?.length) return;
+      const ids = Array.from(new Set(order.orderProductList.map((i) => Number(i.pid)).filter(Boolean)));
+      if (ids.length === 0) return;
+      try {
+        const results = await Promise.all(
+          ids.map(async (id) => {
+            try {
+              const res = await fetch(`http://localhost:8080/api/v1/shop/product/${id}`);
+              if (!res.ok) throw new Error();
+              const p = await res.json();
+              return [id, { name: p?.productName || p?.name, imageUrl: p?.imageUrl || p?.image }] as const;
+            } catch {
+              return [id, { name: undefined, imageUrl: undefined }] as const;
+            }
+          })
+        );
+        const map: Record<number, { name?: string; imageUrl?: string }> = {};
+        results.forEach(([id, meta]) => (map[Number(id)] = meta));
+        setProductMap(map);
+      } catch {
+        // ignore; fallback to PID
+      }
+    };
+    loadProducts();
+  }, [order]);
 
   function normalizeOrder(raw: any): Order {
     const list = raw?.orderProductList ?? raw?.orderProducts ?? [];
@@ -152,7 +181,7 @@ export default function ShopOrderDetailsPage() {
                 {order.orderProductList?.length ? (
                   order.orderProductList.map((op) => (
                     <div key={op.id} className="flex items-center justify-between border rounded p-3">
-                      <div className="text-muted-foreground">{op.productName ? op.productName : `PID: ${op.pid}`}</div>
+                      <div className="text-muted-foreground">{productMap[Number(op.pid)]?.name || op.productName || `PID: ${op.pid}`}</div>
                       <div className="text-muted-foreground">Qty: {op.quantity}</div>
                       <div className="font-medium">₹{Number(op.price).toFixed(2)}</div>
                     </div>
