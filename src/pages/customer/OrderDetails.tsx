@@ -121,7 +121,7 @@ export default function CustomerOrderDetailsPage() {
     const p = products[pid] as any;
     if (!p) return undefined;
     console.log(JSON.stringify(p.productImageLinks[0]));
-    return JSON.stringify(p.productImageLinks[0]);
+    return JSON.stringify(p.productImageLinks[0].imageLink);
   }
 
   async function toggleItem(pid: number) {
