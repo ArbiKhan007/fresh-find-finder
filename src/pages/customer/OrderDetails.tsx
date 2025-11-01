@@ -105,18 +105,23 @@ export default function CustomerOrderDetailsPage() {
       orderProductList,
       shop: raw?.shop,
       customer: raw?.customer,
-      deliveryStatus: raw?.deliveryStatus ?? raw?.status ?? raw?.paymentState,
-      deliveredDateTime: raw?.deliveredDateTime ?? raw?.deliveryDate ?? raw?.deliveredAt,
+      deliveryStatus: raw?.state,
+      deliveredDateTime: raw?.deliveredDateTime,
     } as Order;
   }
 
+  function normalizeImageUrl(u?: string): string | undefined {
+    if (!u) return undefined;
+    if (u.startsWith("http://") || u.startsWith("https://") || u.startsWith("data:")) return u;
+    // Treat as relative path coming from backend
+    return `http://localhost:8080${u.startsWith("/") ? "" : "/"}${u}`;
+  }
+
   function firstImageUrl(pid: number): string | undefined {
-    const links = products[pid]?.productImageLinks;
-    if (!links || !Array.isArray(links) || links.length === 0) return undefined;
-    const first = links[0] as any;
-    if (typeof first === "string") return first as string;
-    if (first && typeof first === "object" && (first.url || first.link)) return (first.url || first.link) as string;
-    return undefined;
+    const p = products[pid] as any;
+    if (!p) return undefined;
+
+    return p.productImageLinks[0];
   }
 
   async function toggleItem(pid: number) {
