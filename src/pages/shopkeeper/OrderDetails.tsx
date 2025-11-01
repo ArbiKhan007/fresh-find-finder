@@ -32,6 +32,8 @@ interface Order {
   orderProductList?: OrderProduct[];
   shop?: ShopLite;
   customer?: UserLite;
+  deliveryStatus?: string;
+  deliveredDateTime?: string;
 }
 
 interface ProductDetails {
@@ -102,7 +104,46 @@ export default function ShopOrderDetailsPage() {
       orderProductList,
       shop: raw?.shop,
       customer: raw?.customer,
+      deliveryStatus: raw?.deliveryStatus ?? raw?.state ?? raw?.paymentState,
+      deliveredDateTime: raw?.deliveredDateTime ?? raw?.deliveryDate ?? raw?.deliveredAt,
     } as Order;
+  }
+
+  function normalizeImageUrl(u?: string): string | undefined {
+    if (!u) return undefined;
+    if (u.startsWith("http://") || u.startsWith("https://") || u.startsWith("data:")) return u;
+    return `http://localhost:8080${u.startsWith("/") ? "" : "/"}${u}`;
+  }
+
+  function firstImageUrl(products: Record<number, ProductDetails>, pid: number): string | undefined {
+    const p = products[pid] as any;
+    if (!p) return undefined;
+    const fromArray = (arr: any[]): string | undefined => {
+      for (const item of arr) {
+        if (!item) continue;
+        if (typeof item === "string") {
+          const nu = normalizeImageUrl(item);
+          if (nu) return nu;
+        } else if (typeof item === "object") {
+          const nu = normalizeImageUrl(item.imageLink || item.url || item.link || item.href || item.src || item.path || item.s3Key);
+          if (nu) return nu;
+        }
+      }
+      return undefined;
+    };
+    if (Array.isArray(p.productImageLinks)) {
+      const nu = fromArray(p.productImageLinks);
+      if (nu) return nu;
+    }
+    if (Array.isArray(p.productImages)) {
+      const nu = fromArray(p.productImages);
+      if (nu) return nu;
+    }
+    if (Array.isArray(p.images)) {
+      const nu = fromArray(p.images);
+      if (nu) return nu;
+    }
+    return normalizeImageUrl(p.imageUrl || p.thumbnailUrl || p.thumbnail || p.image || p.primaryImage);
   }
 
   async function toggleItem(pid: number) {
@@ -193,24 +234,50 @@ export default function ShopOrderDetailsPage() {
                         <div className="font-medium">₹{Number(op.price).toFixed(2)}</div>
                       </button>
                       {expanded[Number(op.pid)] && (
-                        <div className="px-4 pb-4 text-sm space-y-2">
-                          <div className="grid md:grid-cols-2 gap-2 text-muted-foreground">
-                            <div>
-                              <span className="font-medium text-foreground">Manufacturer: </span>
-                              {products[Number(op.pid)]?.manufacturer || "—"}
+                        <div className="px-4 pb-4">
+                          <div className="flex gap-4">
+                            <div className="w-20 h-20 rounded border bg-white overflow-hidden flex items-center justify-center">
+                              {firstImageUrl(products, Number(op.pid)) ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={firstImageUrl(products, Number(op.pid))} alt={products[Number(op.pid)]?.productName || op.productName || `PID: ${op.pid}`} className="w-full h-full object-contain" />
+                              ) : (
+                                <div className="text-xs text-muted-foreground">No image</div>
+                              )}
                             </div>
-                            <div>
-                              <span className="font-medium text-foreground">Category: </span>
-                              {products[Number(op.pid)]?.category || "—"}
+                            <div className="flex-1 space-y-1">
+                              <div className="flex items-start gap-2">
+                                <span className="font-medium text-foreground leading-snug">
+                                  {products[Number(op.pid)]?.productName || op.productName || `PID: ${op.pid}`}
+                                </span>
+                                <span className="ml-2 inline-flex items-center rounded border px-2 py-0.5 text-xs text-muted-foreground">x{op.quantity}</span>
+                              </div>
+                              {products[Number(op.pid)]?.productSpecification && (
+                                <div className="text-sm text-muted-foreground line-clamp-2">
+                                  {products[Number(op.pid)]?.productSpecification}
+                                </div>
+                              )}
+                              <div className="text-sm text-foreground font-medium">
+                                {(() => {
+                                  const status = order.deliveryStatus || order.paymentState || "Pending";
+                                  const onDate = order.deliveredDateTime ? new Date(order.deliveredDateTime).toLocaleDateString() : null;
+                                  return onDate ? `${status} on ${onDate}` : status;
+                                })()}
+                              </div>
+
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                <Button variant="outline">Mark as Packed</Button>
+                                <Button variant="outline">Mark as Shipped</Button>
+                                <Button className="bg-green-600 text-white hover:bg-green-700">Mark as Delivered</Button>
+                              </div>
+                            </div>
+                            <div className="hidden md:flex flex-col gap-2 w-56">
+                              <Button variant="outline">Message Customer</Button>
+                              <Button variant="outline">Print Invoice</Button>
+                              <Button variant="outline">View Product</Button>
+                              <Button variant="outline">Issue Refund</Button>
                             </div>
                           </div>
-                          {products[Number(op.pid)]?.productSpecification && (
-                            <div className="text-muted-foreground">
-                              <span className="font-medium text-foreground">Specs: </span>
-                              {products[Number(op.pid)]?.productSpecification}
-                            </div>
-                          )}
-                          <div className="grid md:grid-cols-3 gap-2 text-muted-foreground">
+                          <div className="mt-3 grid md:grid-cols-3 gap-2 text-muted-foreground text-sm">
                             <div>
                               <span className="font-medium text-foreground">MRP: </span>
                               {products[Number(op.pid)]?.price ?? "—"}
@@ -223,6 +290,12 @@ export default function ShopOrderDetailsPage() {
                               <span className="font-medium text-foreground">Subtotal: </span>
                               ₹{(Number(op.price) * Number(op.quantity)).toFixed(2)}
                             </div>
+                          </div>
+                          <div className="mt-3 grid md:hidden gap-2">
+                            <Button variant="outline">Message Customer</Button>
+                            <Button variant="outline">Print Invoice</Button>
+                            <Button variant="outline">View Product</Button>
+                            <Button variant="outline">Issue Refund</Button>
                           </div>
                         </div>
                       )}
