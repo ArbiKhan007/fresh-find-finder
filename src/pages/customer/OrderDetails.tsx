@@ -120,8 +120,8 @@ export default function CustomerOrderDetailsPage() {
   function firstImageUrl(pid: number): string | undefined {
     const p = products[pid] as any;
     if (!p) return undefined;
-
-    return p.productImageLinks[0];
+    console.log(JSON.stringify(p.productImageLinks[0]));
+    return JSON.stringify(p.productImageLinks[0]);
   }
 
   async function toggleItem(pid: number) {
